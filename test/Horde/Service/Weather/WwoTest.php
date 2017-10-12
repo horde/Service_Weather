@@ -9,7 +9,6 @@
  * @subpackage UnitTests
  * @author     Michael J Rubinsky <mrubinsk@horde.org>
  * @license    http://www.horde.org/licenses/bsd BSD
- * @link       http://pear.horde.org/index.php?package=Service_Weather
  */
 class Horde_Service_Weather_WwoTest extends Horde_Test_Case
 {
