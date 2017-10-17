@@ -34,7 +34,7 @@
     <dir name="Horde">
      <dir name="Service">
       <dir name="Weather">
-       <file name="UPGRADING" role="doc" />
+       <file name="UPGRADING.rst" role="doc" />
       </dir> <!-- /doc/Horde/Service/Weather -->
      </dir> <!-- /doc/Horde/Service -->
     </dir> <!-- /doc/Horde -->
@@ -367,7 +367,7 @@
  <phprelease>
   <filelist>
    <install as="horde-service-weather-metar-database" name="bin/horde-service-weather-metar-database" />
-   <install as="UPGRADING" name="doc/Horde/Service/Weather/UPGRADING" />
+   <install as="UPGRADING.rst" name="doc/Horde/Service/Weather/UPGRADING.rst" />
    <install as="Horde/Service/Weather.php" name="lib/Horde/Service/Weather.php" />
    <install as="Horde/Service/Weather/Alerts/Base.php" name="lib/Horde/Service/Weather/Alerts/Base.php" />
    <install as="Horde/Service/Weather/Alerts/WeatherUnderground.php" name="lib/Horde/Service/Weather/Alerts/WeatherUnderground.php" />
