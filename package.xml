@@ -10,7 +10,7 @@
   <email>mrubinsk@horde.org</email>
   <active>yes</active>
  </lead>
- <date>2017-10-17</date>
+ <date>2017-10-20</date>
  <version>
   <release>2.5.5</release>
   <api>1.5.0</api>
@@ -181,7 +181,6 @@
        <file name="AllTests.php" role="test" />
        <file name="bootstrap.php" role="test" />
        <file name="MetarTest.php" role="test" />
-       <file name="phpunit.xml" role="test" />
        <file name="WundergroundTest.php" role="test" />
        <file name="WwoTest.php" role="test" />
        <file name="Wwov2Test.php" role="test" />
@@ -433,7 +432,6 @@
    <install as="Horde/Service/Weather/fixtures/taf/KSAW.TXT" name="test/Horde/Service/Weather/fixtures/taf/KSAW.TXT" />
    <install as="Horde/Service/Weather/fixtures/wwov2.json" name="test/Horde/Service/Weather/fixtures/wwov2.json" />
    <install as="Horde/Service/Weather/MetarTest.php" name="test/Horde/Service/Weather/MetarTest.php" />
-   <install as="Horde/Service/Weather/phpunit.xml" name="test/Horde/Service/Weather/phpunit.xml" />
    <install as="Horde/Service/Weather/WundergroundTest.php" name="test/Horde/Service/Weather/WundergroundTest.php" />
    <install as="Horde/Service/Weather/WwoTest.php" name="test/Horde/Service/Weather/WwoTest.php" />
    <install as="Horde/Service/Weather/Wwov2Test.php" name="test/Horde/Service/Weather/Wwov2Test.php" />
@@ -1062,7 +1060,7 @@
    <stability>
     <release>stable</release>
     <api>stable</api></stability>
-   <date>2017-10-17</date>
+   <date>2017-10-20</date>
    <license uri="http://www.horde.org/licenses/bsd">BSD-2-Clause</license>
    <notes>
 * 
