@@ -1,0 +1,449 @@
+---
+2.5.5:
+  api: 1.5.0
+  state:
+    release: stable
+    api: stable
+  date: 2017-10-20
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes:
+2.5.4:
+  api: 1.5.0
+  state:
+    release: stable
+    api: stable
+  date: 2017-02-27
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [jan] Fix regression with PHP < 5.5.
+2.5.3:
+  api: 1.5.0
+  state:
+    release: stable
+    api: stable
+  date: 2016-12-10
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [mjr] Create standalone CLI script for generation of metar station data.
+    [mjr] Improve metar table creation performance.
+2.5.2:
+  api: 1.5.0
+  state:
+    release: stable
+    api: stable
+  date: 2016-11-10
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [mjr] More fixes for Postgres, and more robust data validation during migration.
+2.5.1:
+  api: 1.5.0
+  state:
+    release: stable
+    api: stable
+  date: 2016-11-09
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [mjr] Fix migration for Postgres (Bug #14508).
+2.5.0:
+  api: 1.5.0
+  state:
+    release: stable
+    api: stable
+  date: 2016-11-06
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [mjr] Replace defunct data source for surface station data (Bug #14502).
+2.4.1:
+  api: 1.4.0
+  state:
+    release: stable
+    api: stable
+  date: 2016-11-03
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [jan] Update location of METAR stations.
+2.4.0:
+  api: 1.4.0
+  state:
+    release: stable
+    api: stable
+  date: 2016-09-02
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [mjr] Add support for METAR/TAF weather sources.
+2.3.4:
+  api: 1.3.0
+  state:
+    release: stable
+    api: stable
+  date: 2016-07-01
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [jan] Fix translations of weather alert types and significances.
+    [jan] Calculate time of last condition update more precisely.
+2.3.3:
+  api: 1.3.0
+  state:
+    release: stable
+    api: stable
+  date: 2016-03-16
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [mjr] Fix fatal error related to setting timezone in WWO driver (Bug #14289).
+2.3.2:
+  api: 1.3.0
+  state:
+    release: stable
+    api: stable
+  date: 2016-02-02
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [jan] Catch Horde_Date exceptions and try harder to provide dates for weather alerts.
+    [jan] Mark PHP 7 as supported.
+2.3.1:
+  api: 1.3.0
+  state:
+    release: stable
+    api: stable
+  date: 2015-12-04
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [jan] Fix undefined variable warnings.
+2.3.0:
+  api: 1.3.0
+  state:
+    release: stable
+    api: stable
+  date: 2015-10-20
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [mjr] Add support for OpenWeatherMap API.
+    [mjr] Add support for radar maps if provider provides them.
+    [mjr] Add support for weather alerts.
+2.2.0:
+  api: 1.3.0
+  state:
+    release: stable
+    api: stable
+  date: 2015-08-29
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [mjr] Update WWO to support the v2 API (Request #14094).
+2.1.6:
+  api: 1.2.0
+  state:
+    release: stable
+    api: stable
+  date: 2015-03-04
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [mjr] Fix fatal error when using pecl_http (Bug #13897).
+2.1.5:
+  api: 1.2.0
+  state:
+    release: stable
+    api: stable
+  date: 2015-01-09
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [jan] Support loading translations from Composer-installed package.
+2.1.4:
+  api: 1.2.0
+  state:
+    release: stable
+    api: stable
+  date: 2014-10-11
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [mjr] Add missing percent sign for humidity when using WWO.
+    [mjr] Fix detected errors returned from WWO.
+2.1.3:
+  api: 1.2.0
+  state:
+    release: stable
+    api: stable
+  date: 2014-07-01
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [jan] Fix broken translations of wind forecasts.
+2.1.2:
+  api: 1.2.0
+  state:
+    release: stable
+    api: stable
+  date: 2014-06-30
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [mjr] Adjust to changes in Wunderground API (Bug #13299, arjen+horde@de-korte.org).
+2.1.1:
+  api: 1.2.0
+  state:
+    release: stable
+    api: stable
+  date: 2014-05-21
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [mjr] Add cardinal direction abbreviations (Bug #13186).
+    [jan] Add Hungarian translation (Andras Galos <galosa@netinform.hu>).
+2.1.0:
+  api: 1.2.0
+  state:
+    release: stable
+    api: stable
+  date: 2014-04-02
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [mjr] Fix fetching local observation time from Wwo (Bug #13083, maciej.uhlig@us.edu.pl).
+2.0.5:
+  api: 1.1.0
+  state:
+    release: stable
+    api: stable
+  date: 2013-05-25
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [mjr] Update WWO API endpoints.
+2.0.4:
+  api: 1.1.0
+  state:
+    release: stable
+    api: stable
+  date: 2013-03-05
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [jan] Fix unit tests.
+2.0.3:
+  api: 1.1.0
+  state:
+    release: stable
+    api: stable
+  date: 2013-01-29
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [jan] Add French translation (Paul De Vlieger <paul.de_vlieger@moniut.univ-bpclermont.fr>).
+2.0.2:
+  api: 1.1.0
+  state:
+    release: stable
+    api: stable
+  date: 2013-01-09
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [jan] Add Basque translation (Ibon Igartua <ibon.igartua@ehu.es>).
+2.0.1:
+  api: 1.1.0
+  state:
+    release: stable
+    api: stable
+  date: 2012-11-06
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [jan] Update Japanese translation (Hiromi Kimura <hiromi@tac.tsukuba.ac.jp>).
+    [mjr] Remove support for Google's dead weather API.
+2.0.0:
+  api: 1.1.0
+  state:
+    release: stable
+    api: stable
+  date: 2012-10-30
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    First stable release for Horde 5.
+2.0.0RC1:
+  api: 1.1.0
+  state:
+    release: beta
+    api: stable
+  date: 2012-10-26
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [mjr] Catch XML parsing errors.
+2.0.0beta1:
+  api: 1.1.0
+  state:
+    release: beta
+    api: stable
+  date: 2012-07-19
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    First beta release for Horde 5.
+2.0.0alpha1:
+  api: 1.1.0
+  state:
+    release: alpha
+    api: stable
+  date: 2012-07-06
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    First alpha release for Horde 5.
+1.1.2:
+  api: 1.1.0
+  state:
+    release: stable
+    api: stable
+  date: 2012-06-28
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [mjr] Update image conditions mapping for Google driver.
+1.1.1:
+  api: 1.1.0
+  state:
+    release: stable
+    api: stable
+  date: 2012-03-20
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [jan] Add Finnish translation (Leena Heino <liinu@uta.fi>).
+1.1.0:
+  api: 1.1.0
+  state:
+    release: stable
+    api: stable
+  date: 2012-02-22
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [mjr] WeatherUnderground had done away with the 5 day forecast. Emulate it with a 7 day forecast and limitLength call.
+    [mjr] Allow setting a limit to the number of forecast days that are returned, regardless of the reqested forecast length.
+    [mjr] Fix requesting different forecast lengths for the same location in the same request.
+    [mjr] Add 10 day forecast support for WeatherUnderground.
+1.0.1:
+  api: 1.0.0
+  state:
+    release: stable
+    api: stable
+  date: 2012-01-31
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [jan] Add Spanish translation (Manuel P. Ayala <mayala@unex.es>).
+1.0.0:
+  api: 1.0.0
+  state:
+    release: stable
+    api: stable
+  date: 2012-01-17
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [mjr] Add snow and rain totals to wunderground driver.
+1.0.0RC2:
+  api: 1.0.0RC2
+  state:
+    release: beta
+    api: beta
+  date: 2011-12-21
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [mjr] Fix using IP addresses for determining forecast location (Bug #10857)
+1.0.0RC1:
+  api: 1.0.0RC1
+  state:
+    release: beta
+    api: beta
+  date: 2011-12-13
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [mjr] Use longer cache lifetime for non-changing values (Request #10851).
+1.0.0beta1:
+  api: 1.0.0beta1
+  state:
+    release: beta
+    api: beta
+  date: 2011-12-06
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [jan] Add Dutch translation (Arjen de Korte <build+horde@de-korte.org>).
+    [mjr] Export available detailed forecast fields for each driver (Bug #10813).
+    [mjr] Fix returning correct units when requesting the same location twice, but with different units (Bug #10804).
+    [mjr] Fix returning localized text from Wwo driver (Bug #10804).
+    [mjr] Fix obtaining forecast periods individually..
+    [mjr] Fix obtaining certain properties from Google driver.
+    [mjr] Fix making requests when not using a cache.
+    [jan] Add Japanese translation (Hiromi Kimura <hiromi@tac.tsukuba.ac.jp>).
+    [mjr] Fix path to locale directory.
+    [mjr] Fix setting units (Bug #10792).
+1.0.0alpha1:
+  api: 1.0.0alpha1
+  state:
+    release: alpha
+    api: alpha
+  date: 2011-11-21
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    Initial release.
