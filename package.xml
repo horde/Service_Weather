@@ -10,7 +10,7 @@
   <email>mrubinsk@horde.org</email>
   <active>yes</active>
  </lead>
- <date>2017-10-20</date>
+ <date>2017-10-27</date>
  <version>
   <release>2.5.5</release>
   <api>1.5.0</api>
@@ -33,6 +33,7 @@
     <dir name="Horde">
      <dir name="Service">
       <dir name="Weather">
+       <file name="CHANGES" role="doc" />
        <file name="UPGRADING.rst" role="doc" />
       </dir> <!-- /doc/Horde/Service/Weather -->
      </dir> <!-- /doc/Horde/Service -->
@@ -365,6 +366,7 @@
  <phprelease>
   <filelist>
    <install as="horde-service-weather-metar-database" name="bin/horde-service-weather-metar-database" />
+   <install as="CHANGES" name="doc/Horde/Service/Weather/CHANGES" />
    <install as="UPGRADING.rst" name="doc/Horde/Service/Weather/UPGRADING.rst" />
    <install as="Horde/Service/Weather.php" name="lib/Horde/Service/Weather.php" />
    <install as="Horde/Service/Weather/Alerts/Base.php" name="lib/Horde/Service/Weather/Alerts/Base.php" />
@@ -1059,7 +1061,7 @@
    <stability>
     <release>stable</release>
     <api>stable</api></stability>
-   <date>2017-10-20</date>
+   <date>2017-10-27</date>
    <license uri="http://www.horde.org/licenses/bsd">BSD-2-Clause</license>
    <notes>
    </notes>

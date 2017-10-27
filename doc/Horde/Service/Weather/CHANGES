@@ -1,0 +1,298 @@
+----------
+v2.5.5-git
+----------
+
+
+------
+v2.5.4
+------
+
+[jan] Fix regression with PHP < 5.5.
+
+
+------
+v2.5.3
+------
+
+[mjr] Create standalone CLI script for generation of metar station data.
+[mjr] Improve metar table creation performance.
+
+
+------
+v2.5.2
+------
+
+[mjr] More fixes for Postgres, and more robust data validation during
+      migration.
+
+
+------
+v2.5.1
+------
+
+[mjr] Fix migration for Postgres (Bug #14508).
+
+
+------
+v2.5.0
+------
+
+[mjr] Replace defunct data source for surface station data (Bug #14502).
+
+
+------
+v2.4.1
+------
+
+[jan] Update location of METAR stations.
+
+
+------
+v2.4.0
+------
+
+[mjr] Add support for METAR/TAF weather sources.
+
+
+------
+v2.3.4
+------
+
+[jan] Fix translations of weather alert types and significances.
+[jan] Calculate time of last condition update more precisely.
+
+
+------
+v2.3.3
+------
+
+[mjr] Fix fatal error related to setting timezone in WWO driver (Bug #14289).
+
+
+------
+v2.3.2
+------
+
+[jan] Catch Horde_Date exceptions and try harder to provide dates for weather
+      alerts.
+[jan] Mark PHP 7 as supported.
+
+
+------
+v2.3.1
+------
+
+[jan] Fix undefined variable warnings.
+
+
+------
+v2.3.0
+------
+
+[mjr] Add support for OpenWeatherMap API.
+[mjr] Add support for radar maps if provider provides them.
+[mjr] Add support for weather alerts.
+
+
+------
+v2.2.0
+------
+
+[mjr] Update WWO to support the v2 API (Request #14094).
+
+
+------
+v2.1.6
+------
+
+[mjr] Fix fatal error when using pecl_http (Bug #13897).
+
+
+------
+v2.1.5
+------
+
+[jan] Support loading translations from Composer-installed package.
+
+
+------
+v2.1.4
+------
+
+[mjr] Add missing percent sign for humidity when using WWO.
+[mjr] Fix detected errors returned from WWO.
+
+
+------
+v2.1.3
+------
+
+[jan] Fix broken translations of wind forecasts.
+
+
+------
+v2.1.2
+------
+
+[mjr] Adjust to changes in Wunderground API (Bug #13299,
+      arjen+horde@de-korte.org).
+
+
+------
+v2.1.1
+------
+
+[mjr] Add cardinal direction abbreviations (Bug #13186).
+[jan] Add Hungarian translation (Andras Galos <galosa@netinform.hu>).
+
+
+------
+v2.1.0
+------
+
+[mjr] Fix fetching local observation time from Wwo (Bug #13083,
+      maciej.uhlig@us.edu.pl).
+
+
+------
+v2.0.5
+------
+
+[mjr] Update WWO API endpoints.
+
+
+------
+v2.0.4
+------
+
+[jan] Fix unit tests.
+
+
+------
+v2.0.3
+------
+
+[jan] Add French translation (Paul De Vlieger
+      <paul.de_vlieger@moniut.univ-bpclermont.fr>).
+
+
+------
+v2.0.2
+------
+
+[jan] Add Basque translation (Ibon Igartua <ibon.igartua@ehu.es>).
+
+
+------
+v2.0.1
+------
+
+[jan] Update Japanese translation (Hiromi Kimura <hiromi@tac.tsukuba.ac.jp>).
+[mjr] Remove support for Google's dead weather API.
+
+
+------
+v2.0.0
+------
+
+First stable release for Horde 5.
+
+
+---------
+v2.0.0RC1
+---------
+
+[mjr] Catch XML parsing errors.
+
+
+-----------
+v2.0.0beta1
+-----------
+
+First beta release for Horde 5.
+
+
+------------
+v2.0.0alpha1
+------------
+
+First alpha release for Horde 5.
+
+
+------
+v1.1.2
+------
+
+[mjr] Update image conditions mapping for Google driver.
+
+
+------
+v1.1.1
+------
+
+[jan] Add Finnish translation (Leena Heino <liinu@uta.fi>).
+
+
+------
+v1.1.0
+------
+
+[mjr] WeatherUnderground had done away with the 5 day forecast. Emulate it with
+      a 7 day forecast and limitLength call.
+[mjr] Allow setting a limit to the number of forecast days that are returned,
+      regardless of the reqested forecast length.
+[mjr] Fix requesting different forecast lengths for the same location in the
+      same request.
+[mjr] Add 10 day forecast support for WeatherUnderground.
+
+
+------
+v1.0.1
+------
+
+[jan] Add Spanish translation (Manuel P. Ayala <mayala@unex.es>).
+
+
+------
+v1.0.0
+------
+
+[mjr] Add snow and rain totals to wunderground driver.
+
+
+---------
+v1.0.0RC2
+---------
+
+[mjr] Fix using IP addresses for determining forecast location (Bug #10857)
+
+
+---------
+v1.0.0RC1
+---------
+
+[mjr] Use longer cache lifetime for non-changing values (Request #10851).
+
+
+-----------
+v1.0.0beta1
+-----------
+
+[jan] Add Dutch translation (Arjen de Korte <build+horde@de-korte.org>).
+[mjr] Export available detailed forecast fields for each driver (Bug #10813).
+[mjr] Fix returning correct units when requesting the same location twice, but
+      with different units (Bug #10804).
+[mjr] Fix returning localized text from Wwo driver (Bug #10804).
+[mjr] Fix obtaining forecast periods individually..
+[mjr] Fix obtaining certain properties from Google driver.
+[mjr] Fix making requests when not using a cache.
+[jan] Add Japanese translation (Hiromi Kimura <hiromi@tac.tsukuba.ac.jp>).
+[mjr] Fix path to locale directory.
+[mjr] Fix setting units (Bug #10792).
+
+
+------------
+v1.0.0alpha1
+------------
+
+Initial release.
