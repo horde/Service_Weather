@@ -2,7 +2,7 @@
 <package packagerversion="1.9.2" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
  <name>Horde_Service_Weather</name>
  <channel>pear.horde.org</channel>
- <summary>Horde Weather Provider.</summary>
+ <summary>Weather service library</summary>
  <description>Set of classes that provide an abstraction to various online weather service providers. Includes drivers for WeatherUnderground and WorldWeatherOnline.</description>
  <lead>
   <name>Michael J Rubinsky</name>
@@ -10,7 +10,7 @@
   <email>mrubinsk@horde.org</email>
   <active>yes</active>
  </lead>
- <date>2017-10-30</date>
+ <date>2017-11-14</date>
  <version>
   <release>2.5.5</release>
   <api>1.5.0</api>
@@ -312,7 +312,7 @@
    <pearinstaller>
     <min>1.7.0</min>
    </pearinstaller>
-    <package>
+   <package>
     <name>Horde_Date</name>
     <channel>pear.horde.org</channel>
     <min>2.0.0</min>
@@ -1062,7 +1062,7 @@
    <stability>
     <release>stable</release>
     <api>stable</api></stability>
-   <date>2017-10-30</date>
+   <date>2017-11-14</date>
    <license uri="http://www.horde.org/licenses/bsd">BSD-2-Clause</license>
    <notes>
 * 
