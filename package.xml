@@ -181,7 +181,6 @@
        <file name="AllTests.php" role="test" />
        <file name="bootstrap.php" role="test" />
        <file name="MetarTest.php" role="test" />
-       <file name="phpunit.xml" role="test" />
        <file name="WundergroundTest.php" role="test" />
        <file name="WwoTest.php" role="test" />
        <file name="Wwov2Test.php" role="test" />
@@ -427,7 +426,6 @@
    <install as="Horde/Service/Weather/AllTests.php" name="test/Horde/Service/Weather/AllTests.php" />
    <install as="Horde/Service/Weather/bootstrap.php" name="test/Horde/Service/Weather/bootstrap.php" />
    <install as="Horde/Service/Weather/MetarTest.php" name="test/Horde/Service/Weather/MetarTest.php" />
-   <install as="Horde/Service/Weather/phpunit.xml" name="test/Horde/Service/Weather/phpunit.xml" />
    <install as="Horde/Service/Weather/WundergroundTest.php" name="test/Horde/Service/Weather/WundergroundTest.php" />
    <install as="Horde/Service/Weather/WwoTest.php" name="test/Horde/Service/Weather/WwoTest.php" />
    <install as="Horde/Service/Weather/Wwov2Test.php" name="test/Horde/Service/Weather/Wwov2Test.php" />
