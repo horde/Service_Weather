@@ -350,7 +350,7 @@ class Horde_Service_Weather_Owm extends Horde_Service_Weather_Base
             $url->add('units', 'imperial');
         }
         $url->add(array(
-            'key' => $this->_key
+            'appid' => $this->_key
         ))->setRaw(true);
 
         $cachekey = md5('hordeweather' . $url);
