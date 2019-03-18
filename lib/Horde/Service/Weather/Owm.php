@@ -135,7 +135,7 @@ class Horde_Service_Weather_Owm extends Horde_Service_Weather_Base
      */
     public function autocompleteLocation($search)
     {
-        $results = $this->searchLocations($search);
+        $results = $this->_parseSearchLocations($this->_searchLocations($search));
         return $this->_parseAutocomplete($results);
     }
 
