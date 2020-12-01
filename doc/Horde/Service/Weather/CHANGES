@@ -1,6 +1,8 @@
-----------
-v2.5.5-git
-----------
+------
+v2.5.5
+------
+
+[mjr] Remove deprecated string index accessor.
 
 
 ------
