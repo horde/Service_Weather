@@ -10,7 +10,13 @@
  * @author     Michael J Rubinsky <mrubinsk@horde.org>
  * @license    http://www.horde.org/licenses/bsd BSD
  */
-class Horde_Service_Weather_MetarTest extends Horde_Test_Case
+namespace Horde\Service\Weather;
+use Horde_Test_Case as TestCase;
+use \Horde_Service_Weather;
+use \Horde_Service_Weather_Metar;
+use \Horde_Service_Weather_Translation;
+
+class MetarTest extends TestCase
 {
     public function testCurrentConditions()
     {
@@ -89,7 +95,7 @@ class Horde_Service_Weather_MetarTest extends Horde_Test_Case
         $this->assertEquals('Visibility AT 3 miles mist Sky overcast', $dayTwo->conditions);
 
         // Test unknown throws exception
-        $this->setExpectedException('Horde_Service_Weather_Exception_InvalidProperty');
+        $this->expectException('Horde_Service_Weather_Exception_InvalidProperty');
         $this->assertEquals(false, $dayOne->foobar);
     }
 
