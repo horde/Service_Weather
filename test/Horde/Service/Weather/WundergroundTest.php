@@ -10,7 +10,15 @@
  * @author     Michael J Rubinsky <mrubinsk@horde.org>
  * @license    http://www.horde.org/licenses/bsd BSD
  */
-class Horde_Service_Weather_WundergroundTest extends PHPUnit_Framework_TestCase
+namespace Horde\Service\Weather;
+use PHPUnit\Framework\TestCase;
+use \Horde_Service_Weather_WeatherUnderground;
+use \Horde_Http_Response_Mock;
+use \Horde_Http_Request_Mock;
+use \Horde_Service_Weather;
+use \Horde_Http_Client;
+
+class WundergroundTest extends TestCase
 {
     public function testCurrentConditions()
     {
