@@ -101,7 +101,7 @@ class Wwov2Test extends Horde_Test_Case
 
     protected function _getHttpClientStub()
     {
-        $request = $this->getMockSkipConstructor('Horde_Http_Client');
+        $request = $this->getMockBuilder('Horde_Http_Client')->disableOriginalConstructor()->getMock();
         $request->expects($this->any())
             ->method('get')
             ->will($this->returnCallback(array($this, 'mockHttpCallback')));
