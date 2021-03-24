@@ -11,10 +11,10 @@
  * @license    http://www.horde.org/licenses/bsd BSD
  */
 namespace Horde\Service\Weather;
-use Horde_Test_Case;
+use Horde_Test_Case as TestCase;
 use \Horde_Service_Weather_Wwo;
 
-class Wwov2Test extends Horde_Test_Case
+class Wwov2Test extends TestCase
 {
     protected $_mockUrls = array(
         'https://api.worldweatheronline.com/free/v2/weather.ashx?q=39.660%2C-75.093&num_of_days=5&includeLocation=yes&extra=localObsTime&tp=24&showlocaltime=yes&showmap=yes&format=json&key=xxx' => 'wwov2.json');

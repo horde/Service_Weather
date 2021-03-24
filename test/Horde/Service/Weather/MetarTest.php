@@ -11,12 +11,12 @@
  * @license    http://www.horde.org/licenses/bsd BSD
  */
 namespace Horde\Service\Weather;
-use Horde_Test_Case;
+use Horde_Test_Case as TestCase;
 use \Horde_Service_Weather;
 use \Horde_Service_Weather_Metar;
 use \Horde_Service_Weather_Translation;
 
-class MetarTest extends Horde_Test_Case
+class MetarTest extends TestCase
 {
     public function testCurrentConditions()
     {
