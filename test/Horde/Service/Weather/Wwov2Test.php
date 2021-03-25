@@ -13,6 +13,8 @@
 namespace Horde\Service\Weather;
 use Horde_Test_Case as TestCase;
 use \Horde_Service_Weather_Wwo;
+use \Horde_Http_Response_Mock;
+use \Horde_Service_Weather;
 
 class Wwov2Test extends TestCase
 {
@@ -122,6 +124,8 @@ class Wwov2Test extends TestCase
 
     public function mockHttpCallback($url)
     {
+        $this->expectException('Exception');
+
         switch ((string)$url) {
         case 'https://api.worldweatheronline.com/free/v2/weather.ashx?q=clayton%2Cnj&num_of_days=5&includeLocation=yes&extra=localObsTime&tp=24&showlocaltime=yes&showmap=yes&format=json&key=xxx':
             $stream = fopen(__DIR__ . '/fixtures/wwov2.json', 'r');
@@ -133,7 +137,7 @@ class Wwov2Test extends TestCase
             $stream = fopen(__DIR__ . '/fixtures/wwov2.json', 'r');
             break;
         default:
-            throw new Exception(sprintf('Invalid Url: %s', (string)$url));
+            throw new \Exception(sprintf('Invalid Url: %s', (string)$url));
         }
         $response = new Horde_Http_Response_Mock($url, $stream);
         $response->code = 200;

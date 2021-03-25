@@ -16,7 +16,6 @@ use \Horde_Http_Response_Mock;
 use \Horde_Http_Request_Mock;
 use \Horde_Service_Weather;
 use \Horde_Http_Client;
-use \Horde_Service_Weather_WeatherUnderground;
 
 class WundergroundTest extends TestCase
 {
@@ -108,12 +107,17 @@ class WundergroundTest extends TestCase
         $request = new Horde_Http_Request_Mock();
         $request->setResponse($response);
 
-        return new Horde_Service_Weather_WeatherUnderground(
-            array(
-                'apikey' => 'xxx',
-                'http_client' => new Horde_Http_Client(array('request' => $request))
-            )
-        );
+        if (class_exists(Horde_Service_Weather_WeatherUnderground::class)) {
+            return new Horde_Service_Weather_WeatherUnderground(
+                array(
+                    'apikey' => 'xxx',
+                    'http_client' => new Horde_Http_Client(array('request' => $request))
+                )
+            );
+        } else {
+            $this->markTestSkipped('Horde_Service_Weather_WeatherUnderground not available.');
+        }
+        
     }
 
 }
