@@ -10,7 +10,13 @@
  * @author     Michael J Rubinsky <mrubinsk@horde.org>
  * @license    http://www.horde.org/licenses/bsd BSD
  */
-class Horde_Service_Weather_WwoTest extends Horde_Test_Case
+namespace Horde\Service\Weather;
+use Horde_Test_Case as TestCase;
+use \Horde_Service_Weather_Wwo;
+use \Horde_Service_Weather;
+use \Horde_Http_Response_Mock;
+
+class WwoTest extends TestCase
 {
     protected $_mockUrls = array(
         'http://api.worldweatheronline.com/free/v1/weather.ashx?q=boston%2Cma&num_of_days=5&includeLocation=yes&timezone=yes&extra=localObsTime&format=json&key=xxx' => 'boston_wwo.json',
@@ -112,7 +118,7 @@ class Horde_Service_Weather_WwoTest extends Horde_Test_Case
 
     protected function _getHttpClientStub()
     {
-        $request = $this->getMockSkipConstructor('Horde_Http_Client');
+        $request = $this->getMockBuilder('Horde_Http_Client')->disableOriginalConstructor()->getMock();
         $request->expects($this->any())
             ->method('get')
             ->will($this->returnCallback(array($this, 'mockHttpCallback')));
@@ -132,6 +138,8 @@ class Horde_Service_Weather_WwoTest extends Horde_Test_Case
 
     public function mockHttpCallback($url)
     {
+        $this->expectException('Exception');
+
         switch ((string)$url) {
         case 'http://api.worldweatheronline.com/free/v1/weather.ashx?q=boston%2Cma&num_of_days=5&includeLocation=yes&extra=localObsTime&timezone=yes&format=json&key=xxx':
             $stream = fopen(__DIR__ . '/fixtures/boston_wwo.json', 'r');
@@ -141,7 +149,7 @@ class Horde_Service_Weather_WwoTest extends Horde_Test_Case
             $stream = fopen(__DIR__ . '/fixtures/boston_location_wwo.json', 'r');
             break;
         default:
-            throw new Exception('Invalid Url');
+            throw new \Exception('Invalid Url');
         }
         $response = new Horde_Http_Response_Mock($url, $stream);
         $response->code = 200;
