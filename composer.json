@@ -1,4 +1,5 @@
 {
+    "minimum-stability": "dev",
     "name": "horde/service_weather",
     "description": "Weather service library",
     "type": "horde-library",
