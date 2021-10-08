@@ -1,8 +1,7 @@
 {
-    "minimum-stability": "dev",
     "name": "horde/service_weather",
     "description": "Weather service library",
-    "type": "horde-library",
+    "type": "library",
     "homepage": "https://www.horde.org/libraries/Horde_Service_Weather",
     "license": "BSD-2-Clause",
     "authors": [
@@ -12,8 +11,7 @@
             "role": "lead"
         }
     ],
-    "version": "3.0.0alpha3",
-    "time": "2021-02-24",
+    "time": "2021-10-08",
     "repositories": [
         {
             "type": "composer",
@@ -21,7 +19,6 @@
         }
     ],
     "require": {
-        "horde/horde-installer-plugin": "*",
         "php": "^7",
         "horde/date": "^3",
         "horde/exception": "^3",
@@ -29,12 +26,18 @@
         "horde/translation": "^3",
         "horde/url": "^3"
     },
+    "require-dev": {},
     "suggest": {
         "horde/test": "^3"
     },
     "autoload": {
         "psr-0": {
             "Horde_Service_Weather": "lib/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Horde\\Service\\Weather\\Test\\": "test/"
         }
     }
 }

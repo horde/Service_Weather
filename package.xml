@@ -10,7 +10,7 @@
   <email>mrubinsk@horde.org</email>
   <active>yes</active>
  </lead>
- <date>2021-02-24</date>
+ <date>2021-10-08</date>
  <version>
   <release>3.0.0alpha3</release>
   <api>3.0.0alpha1</api>
@@ -21,10 +21,17 @@
  </stability>
  <license uri="http://www.horde.org/licenses/bsd">BSD-2-Clause</license>
  <notes>
-* 
+* |+
  </notes>
  <contents>
   <dir baseinstalldir="/" name="/">
+   <dir name=".github">
+    <dir name="workflows">
+     <file name="ci.yml" role="php" />
+     <file name="phpdoc.yml" role="php" />
+     <file name="update-satis.yml" role="php" />
+    </dir> <!-- /.github/workflows -->
+   </dir> <!-- /.github -->
    <dir name="bin">
     <file name="horde-service-weather-metar-database" role="script">
      <tasks:replace from="/usr/bin/env php" to="php_bin" type="pear-config" />
@@ -316,6 +323,9 @@
  </usesrole>
  <phprelease>
   <filelist>
+   <install as="workflows/ci.yml" name=".github/workflows/ci.yml" />
+   <install as="workflows/phpdoc.yml" name=".github/workflows/phpdoc.yml" />
+   <install as="workflows/update-satis.yml" name=".github/workflows/update-satis.yml" />
    <install as="horde-service-weather-metar-database" name="bin/horde-service-weather-metar-database" />
    <install as="CHANGES" name="doc/Horde/Service/Weather/CHANGES" />
    <install as="UPGRADING.rst" name="doc/Horde/Service/Weather/UPGRADING.rst" />
@@ -483,46 +493,6 @@
   </filelist>
  </phprelease>
  <changelog>
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
   <release>
    <version>
     <release>1.0.0alpha1</release>
@@ -1155,7 +1125,7 @@
    <date>2021-02-24</date>
    <license uri="http://www.horde.org/licenses/bsd">BSD-2-Clause</license>
    <notes>
-* 
+* |+
    </notes>
   </release>
  </changelog>
