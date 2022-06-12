@@ -30,6 +30,7 @@ abstract class Horde_Service_Weather_Parser_Base
     const UNIT_KEY_SPEED = 'speed';
     const UNIT_KEY_PRESSURE = 'pressure';
     const UNIT_KEY_DISTANCE = 'distance';
+    const UNIT_KEY_HEIGHT = 'height';
 
     /**
      * The type of units to convert to.

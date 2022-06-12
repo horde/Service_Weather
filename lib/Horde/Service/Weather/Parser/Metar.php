@@ -290,7 +290,7 @@ class Horde_Service_Weather_Parser_Metar extends Horde_Service_Weather_Parser_Ba
                                 $cloud['height'] = Horde_Service_Weather::convertDistance(
                                     $result[4] * 100,
                                     'ft',
-                                     $this->_unitMap[self::UNIT_KEY_DISTANCE]
+                                     $this->_unitMap[self::UNIT_KEY_HEIGHT]
                                  );
                             }
                         } elseif (sizeof($result) == 6) {
@@ -302,7 +302,11 @@ class Horde_Service_Weather_Parser_Metar extends Horde_Service_Weather_Parser_Ba
                             if ($result[4] == '///') {
                                 $cloud['height'] = Horde_Service_Weather_Translation::t('station level or below');
                             } else {
-                                $cloud['height'] = $result[4] * 100;
+                                $cloud['height'] = Horde_Service_Weather::convertDistance(
+                                    $result[4] * 100,
+                                    'ft',
+                                     $this->_unitMap[self::UNIT_KEY_HEIGHT]
+                                 );
                             }
                         } else {
                             // SKC or CLR or NSC
