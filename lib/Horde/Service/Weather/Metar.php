@@ -350,7 +350,7 @@ class Horde_Service_Weather_Metar extends Horde_Service_Weather_Base
             'code' => $code,
             'country_name' => $result['country'],
             'lat' => $result['latitude'],
-            'lon' => $result['lon']
+            'lon' => $result['longitude']
         ));
     }
 
