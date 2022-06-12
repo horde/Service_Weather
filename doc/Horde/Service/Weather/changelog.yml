@@ -8,8 +8,9 @@
   license:
     identifier: BSD-2-Clause
     uri: http://www.horde.org/licenses/bsd
-  notes: |+
-    
+  notes: |
+    [mjr] Fix display and conversion of cloud height in METAR driver.
+    |+
 2.5.5:
   api: 1.5.0
   state:
