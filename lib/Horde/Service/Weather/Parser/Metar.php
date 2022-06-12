@@ -287,7 +287,11 @@ class Horde_Service_Weather_Parser_Metar extends Horde_Service_Weather_Parser_Ba
                             if ($result[4] == '///') {
                                 $cloud['height'] = Horde_Service_Weather_Translation::t('station level or below');
                             } else {
-                                $cloud['height'] = $result[4] * 100;
+                                $cloud['height'] = Horde_Service_Weather::convertDistance(
+                                    $result[4] * 100,
+                                    'ft',
+                                     $this->_unitMap[self::UNIT_KEY_DISTANCE]
+                                 );
                             }
                         } elseif (sizeof($result) == 6) {
                             // Amount, height and type
