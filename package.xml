@@ -10,7 +10,7 @@
   <email>mrubinsk@horde.org</email>
   <active>yes</active>
  </lead>
- <date>2020-12-01</date>
+ <date>2022-06-12</date>
  <version>
   <release>2.5.6</release>
   <api>1.5.0</api>
@@ -21,7 +21,7 @@
  </stability>
  <license uri="http://www.horde.org/licenses/bsd">BSD-2-Clause</license>
  <notes>
-* 
+* [mjr] Fix display and conversion of cloud height in METAR driver.
  </notes>
  <contents>
   <dir baseinstalldir="/" name="/">
@@ -537,45 +537,6 @@
   </filelist>
  </phprelease>
  <changelog>
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
   <release>
    <version>
     <release>1.0.0alpha1</release>
@@ -1193,7 +1154,7 @@
    <date>2020-12-01</date>
    <license uri="http://www.horde.org/licenses/bsd">BSD-2-Clause</license>
    <notes>
-* 
+* [mjr] Fix display and conversion of cloud height in METAR driver.
    </notes>
   </release>
  </changelog>
