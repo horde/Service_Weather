@@ -128,6 +128,7 @@
      *
      * @return ArrayIterator
      */
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         return new ArrayIterator(array_slice($this->_periods, 0, $this->_maxDays));

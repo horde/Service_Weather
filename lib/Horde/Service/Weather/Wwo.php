@@ -253,20 +253,13 @@ class Horde_Service_Weather_Wwo extends Horde_Service_Weather_Base
         // Sunrise/Sunset
         // @todo - this is now available in the forecast section in v2
         $date = $this->_current->time;
-        $station->sunset = new Horde_Date(
-            date_sunset(
-                $date->timestamp(),
-                SUNFUNCS_RET_TIMESTAMP,
-                $station->lat,
-                $station->lon)
+        $sun_info = date_sun_info(
+            $date->timestamp(),
+            $station->lat,
+            $station->lon
         );
-        $station->sunrise = new Horde_Date(
-            date_sunrise(
-                $date->timestamp(),
-                SUNFUNCS_RET_TIMESTAMP,
-                $station->lat,
-                $station->lon)
-        );
+        $station->sunset = new Horde_Date($sun_info['sunset']);
+        $station->sunrise = new Horde_Date($sun_info['sunrise']);
         $station->time = (string)$date;
         $this->_station = $station;
         $this->_forecast = $this->_parseForecast($results->data->weather);
