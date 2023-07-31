@@ -89,7 +89,7 @@ class Horde_Service_Weather_MetarTest extends Horde_Test_Case
         $this->assertEquals('Visibility AT 3 miles mist Sky overcast', $dayTwo->conditions);
 
         // Test unknown throws exception
-        $this->setExpectedException('Horde_Service_Weather_Exception_InvalidProperty');
+        $this->expectException('Horde_Service_Weather_Exception_InvalidProperty');
         $this->assertEquals(false, $dayOne->foobar);
     }
 

@@ -91,13 +91,15 @@ class Horde_Service_Weather_Wwov2Test extends Horde_Test_Case
         $this->assertEquals(11, $dayOne->wind_speed);
 
         // Test unknown throws exception
-        $this->setExpectedException('Horde_Service_Weather_Exception_InvalidProperty');
+        $this->expectException('Horde_Service_Weather_Exception_InvalidProperty');
         $this->assertEquals(false, $dayOne->foobar);
     }
 
     protected function _getHttpClientStub()
     {
-        $request = $this->getMockSkipConstructor('Horde_Http_Client');
+        $request = $this->getMockBuilder('Horde_Http_Client')
+                        ->disableOriginalConstructor()
+                        ->getMock();
         $request->expects($this->any())
             ->method('get')
             ->will($this->returnCallback(array($this, 'mockHttpCallback')));
@@ -119,13 +121,13 @@ class Horde_Service_Weather_Wwov2Test extends Horde_Test_Case
     public function mockHttpCallback($url)
     {
         switch ((string)$url) {
-        case 'https://api.worldweatheronline.com/free/v2/weather.ashx?q=clayton%2Cnj&num_of_days=5&includeLocation=yes&extra=localObsTime&tp=24&showlocaltime=yes&showmap=yes&format=json&key=xxx':
+        case 'https://api.worldweatheronline.com/premium/v2/weather.ashx?q=clayton%2Cnj&num_of_days=5&includeLocation=yes&extra=localObsTime&tp=24&showlocaltime=yes&showmap=yes&format=json&key=xxx':
             $stream = fopen(__DIR__ . '/fixtures/wwov2.json', 'r');
             break;
-        case 'https://api.worldweatheronline.com/free/v2/search.ashx?timezone=yes&q=39.660%2C-75.093&num_of_results=10&format=json&key=xxx':
+        case 'https://api.worldweatheronline.com/premium/v2/search.ashx?timezone=yes&q=39.660%2C-75.093&num_of_results=10&format=json&key=xxx':
             $stream = fopen(__DIR__ . '/fixtures/boston_location_wwo.json', 'r');
             break;
-        case 'https://api.worldweatheronline.com/free/v2/weather.ashx?q=boston%2Cma&num_of_days=5&includeLocation=yes&extra=localObsTime&tp=24&showlocaltime=yes&showmap=yes&format=json&key=xxx':
+        case 'https://api.worldweatheronline.com/premium/v2/weather.ashx?q=boston%2Cma&num_of_days=5&includeLocation=yes&extra=localObsTime&tp=24&showlocaltime=yes&showmap=yes&format=json&key=xxx':
             $stream = fopen(__DIR__ . '/fixtures/wwov2.json', 'r');
             break;
         default:

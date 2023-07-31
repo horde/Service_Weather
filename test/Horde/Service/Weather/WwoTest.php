@@ -106,13 +106,15 @@ class Horde_Service_Weather_WwoTest extends Horde_Test_Case
         $this->assertEquals(false, $dayOne->snow_total);
 
         // Test unknown throws exception
-        $this->setExpectedException('Horde_Service_Weather_Exception_InvalidProperty');
+        $this->expectException('Horde_Service_Weather_Exception_InvalidProperty');
         $this->assertEquals(false, $dayOne->foobar);
     }
 
     protected function _getHttpClientStub()
     {
-        $request = $this->getMockSkipConstructor('Horde_Http_Client');
+        $request = $this->getMockBuilder('Horde_Http_Client')
+                        ->disableOriginalConstructor()
+                        ->getMock();
         $request->expects($this->any())
             ->method('get')
             ->will($this->returnCallback(array($this, 'mockHttpCallback')));
@@ -133,15 +135,15 @@ class Horde_Service_Weather_WwoTest extends Horde_Test_Case
     public function mockHttpCallback($url)
     {
         switch ((string)$url) {
-        case 'http://api.worldweatheronline.com/free/v1/weather.ashx?q=boston%2Cma&num_of_days=5&includeLocation=yes&extra=localObsTime&timezone=yes&format=json&key=xxx':
+        case 'http://api.worldweatheronline.com/premium/v1/weather.ashx?q=boston%2Cma&num_of_days=5&includeLocation=yes&extra=localObsTime&timezone=yes&format=json&key=xxx':
             $stream = fopen(__DIR__ . '/fixtures/boston_wwo.json', 'r');
             break;
 
-        case 'http://api.worldweatheronline.com/free/v1/search.ashx?timezone=yes&q=42.358%2C-71.060&num_of_results=10&format=json&key=xxx':
+        case 'http://api.worldweatheronline.com/premium/v1/search.ashx?timezone=yes&q=42.358%2C-71.060&num_of_results=10&format=json&key=xxx':
             $stream = fopen(__DIR__ . '/fixtures/boston_location_wwo.json', 'r');
             break;
         default:
-            throw new Exception('Invalid Url');
+            throw new Exception(sprintf('Invalid Url: %s', (string)$url));
         }
         $response = new Horde_Http_Response_Mock($url, $stream);
         $response->code = 200;
