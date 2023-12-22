@@ -267,6 +267,8 @@ abstract class Horde_Service_Weather_Base
                 'vis' => Horde_Service_Weather_Translation::t('miles'),
                 'rain' => Horde_Service_Weather_Translation::t('inches'),
                 'snow' => Horde_Service_Weather_Translation::t('inches'),
+                'height' => Horde_Service_Weather_Translation::t('feet')
+
             );
         }
 
@@ -277,6 +279,7 @@ abstract class Horde_Service_Weather_Base
             'vis' => Horde_Service_Weather_Translation::t('km'),
             'rain' => Horde_Service_Weather_Translation::t('millimeters'),
             'snow' => Horde_Service_Weather_Translation::t('centimeters'),
+            'height' => Horde_Service_Weather_Translation::t('meters')
         );
     }
 

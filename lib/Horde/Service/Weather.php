@@ -350,9 +350,8 @@ class Horde_Service_Weather
         if ($temperature == 'N/A') {
             return $temperature;
         }
-
-        $from = strtolower($from[0]);
-        $to   = strtolower($to[0]);
+        $from = strtolower(substr($from, 0, 1));
+        $to   = strtolower(substr($to, 0, 1));
 
         $result = array(
             'f' => array(

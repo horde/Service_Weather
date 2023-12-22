@@ -8,38 +8,30 @@
   license:
     identifier: BSD-2-Clause
     uri: http://www.horde.org/licenses/bsd
-  notes: |+
-    
-3.0.0alpha3:
-  api: 3.0.0alpha1
-  state:
-    release: alpha
-    api: alpha
-  date: 2021-10-08
-  license:
-    identifier: BSD-2-Clause
-    uri: http://www.horde.org/licenses/bsd
-  notes: |+
-3.0.0alpha2:
-  api: 3.0.0alpha1
-  state:
-    release: alpha
-    api: alpha
-  date: 2021-02-24
-  license:
-    identifier: BSD-2-Clause
-    uri: http://www.horde.org/licenses/bsd
-  notes: |+
-3.0.0alpha1:
-  api: 3.0.0alpha1
+  notes: ""
+2.5.6:
+  api: 1.5.0
   state:
     release: stable
     api: stable
-  date: 2021-02-24
+  date: 2020-12-01
   license:
     identifier: BSD-2-Clause
     uri: http://www.horde.org/licenses/bsd
-  notes: ~
+  notes: |
+    [mjr] Fix display and conversion of cloud height in METAR driver.
+    |+
+2.5.5:
+  api: 1.5.0
+  state:
+    release: stable
+    api: stable
+  date: 2020-12-01
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [mjr] Remove deprecated string index accessor.
 2.5.4:
   api: 1.5.0
   state:
