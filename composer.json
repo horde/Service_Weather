@@ -14,25 +14,19 @@
     "version": "2.5.7",
     "time": "2022-06-12",
     "repositories": [
-        {
-            "type": "pear",
-            "url": "https://pear.horde.org"
-        }
     ],
     "require": {
         "php": "^5.3 || ^7",
-        "pear-pear.horde.org/Horde_Date": "^2",
-        "pear-pear.horde.org/Horde_Exception": "^2",
-        "pear-pear.horde.org/Horde_Http": "^2",
-        "pear-pear.horde.org/Horde_Translation": "^2.2",
-        "pear-pear.horde.org/Horde_Url": "^2"
+        "horde/date": "^2",
+        "horde/exception": "^2",
+        "horde/http": "^2",
+        "horde/translation": "^2.2",
+        "horde/url": "^2"
     },
     "suggest": {
-        "pear-pear.horde.org/Horde_Test": "^2.1"
+        "horde/test": "^2.1"
     },
     "replace": {
-        "pear-pear.horde.org/Horde_Service_Weather": "2.*",
-        "pear-horde/Horde_Service_Weather": "2.*"
     },
     "autoload": {
         "psr-0": {
