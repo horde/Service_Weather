@@ -20,18 +20,22 @@
         }
     ],
     "require": {
-        "php": "^7.4 || ^8",
+        "php": "^8.1",
         "horde/date": "^3 || dev-FRAMEWORK_6_0",
-        "horde/exception": "^3 || dev-FRAMEWORK_6_0",
         "horde/http": "^3 || dev-FRAMEWORK_6_0",
         "horde/translation": "^3 || dev-FRAMEWORK_6_0",
         "horde/url": "^3 || dev-FRAMEWORK_6_0"
     },
-    "require-dev": {},
+    "require-dev": {
+        "phpunit/phpunit": "^11 || ^12"
+    },
     "suggest": {
         "horde/test": "^3 || dev-FRAMEWORK_6_0"
     },
     "autoload": {
+        "psr-4": {
+            "Horde\\Service\\Weather\\": "src/"
+        },
         "psr-0": {
             "Horde_Service_Weather": "lib/"
         }
