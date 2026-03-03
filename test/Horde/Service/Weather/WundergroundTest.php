@@ -2,7 +2,7 @@
 /**
  * Horde_Service_Weather tests
  *
- * PHP Version 5
+ * Copyright 2011-2026 Horde LLC (http://www.horde.org/)
  *
  * @category Horde
  * @package Service_Weather

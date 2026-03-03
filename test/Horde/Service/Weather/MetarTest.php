@@ -2,7 +2,7 @@
 /**
  * Horde_Service_Weather tests
  *
- * PHP Version 5
+ * Copyright 2011-2026 Horde LLC (http://www.horde.org/)
  *
  * @category Horde
  * @package Service_Weather
@@ -11,7 +11,7 @@
  * @license    http://www.horde.org/licenses/bsd BSD
  */
 namespace Horde\Service\Weather;
-use Horde_Test_Case as TestCase;
+use PHPUnit\Framework\TestCase;
 use \Horde_Service_Weather;
 use \Horde_Service_Weather_Metar;
 use \Horde_Service_Weather_Translation;
@@ -54,9 +54,11 @@ class MetarTest extends TestCase
 
         // METAR specific stuff.
         $this->assertEquals(Horde_Service_Weather_Translation::t('scattered'), $conditions->clouds[0]['amount']);
-        $this->assertEquals(4300, $conditions->clouds[0]['height']);
+        // Height is returned in meters (1311m ≈ 4300ft)
+        $this->assertEqualsWithDelta(1311, $conditions->clouds[0]['height'], 1);
         $this->assertEquals(Horde_Service_Weather_Translation::t('broken'), $conditions->clouds[1]['amount']);
-        $this->assertEquals(25000, $conditions->clouds[1]['height']);
+        // Height is returned in meters (7620m ≈ 25000ft)
+        $this->assertEqualsWithDelta(7620, $conditions->clouds[1]['height'], 1);
 
         $this->assertEquals(
             Horde_Service_Weather_Translation::t('Automatic weatherstation w/ precipitation discriminator'),

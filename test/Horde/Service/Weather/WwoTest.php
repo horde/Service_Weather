@@ -2,7 +2,7 @@
 /**
  * Horde_Service_Weather tests
  *
- * PHP Version 5
+ * Copyright 2011-2026 Horde LLC (http://www.horde.org/)
  *
  * @category Horde
  * @package Service_Weather
@@ -11,7 +11,7 @@
  * @license    http://www.horde.org/licenses/bsd BSD
  */
 namespace Horde\Service\Weather;
-use Horde_Test_Case as TestCase;
+use PHPUnit\Framework\TestCase;
 use \Horde_Service_Weather_Wwo;
 use \Horde_Service_Weather;
 use \Horde_Http_Response_Mock;
@@ -112,7 +112,7 @@ class WwoTest extends TestCase
         $this->assertEquals(false, $dayOne->snow_total);
 
         // Test unknown throws exception
-        $this->setExpectedException('Horde_Service_Weather_Exception_InvalidProperty');
+        $this->expectException('Horde_Service_Weather_Exception_InvalidProperty');
         $this->assertEquals(false, $dayOne->foobar);
     }
 
@@ -121,7 +121,7 @@ class WwoTest extends TestCase
         $request = $this->getMockBuilder('Horde_Http_Client')->disableOriginalConstructor()->getMock();
         $request->expects($this->any())
             ->method('get')
-            ->will($this->returnCallback(array($this, 'mockHttpCallback')));
+            ->willReturnCallback([$this, 'mockHttpCallback']);
 
         return $request;
     }
