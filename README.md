@@ -282,6 +282,30 @@ $weather = Horde_Service_Weather::factory('Metar', [
 ]);
 ```
 
+## Upgrading from PSR-0 (Horde 5)
+
+Migrating from the legacy `Horde_Service_Weather` API? See **[doc/UPGRADING.md](doc/UPGRADING.md)** for a complete migration guide including:
+
+- Side-by-side code comparisons
+- Provider migration paths
+- Common patterns and gotchas
+- Testing strategies
+- Troubleshooting tips
+
+**Quick example:**
+
+```php
+// Before (PSR-0)
+$weather = Horde_Service_Weather::factory('Owm', ['apikey' => 'key']);
+$conditions = $weather->getCurrentConditions('boston,ma');
+echo $conditions->temp . "°F";
+
+// After (PSR-4)
+$weather = Weather::openWeatherMap('key');
+$current = $weather->getCurrentWeather('42.3601,-71.0589');
+echo $current->temperature->toFahrenheit() . "°F";
+```
+
 ## Testing
 
 ```bash
