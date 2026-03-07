@@ -8,7 +8,80 @@
   license:
     identifier: BSD-2-Clause
     uri: http://www.horde.org/licenses/bsd
-  notes: ""
+  notes:
+3.0.0-alpha5:
+  api: 3.0.0-alpha5
+  state:
+    release: alpha
+    api: alpha
+  date: 2026-03-07
+  license:
+    identifier: BSD-2-Clause
+    uri: https://spdx.org/licenses/BSD-2-Clause.html
+  notes: |-
+    docs(upgrade): add comprehensive PSR-0 to PSR-4 migration guide
+    feat(facade): add Weather facade and comprehensive documentation
+    feat(providers): add OpenWeatherMap, WeatherAPI.com, and NWS providers
+    refactor(tests): migrate legacy tests to PHPUnit 11/12/13
+    test(weather): add comprehensive test suite for PSR-4 implementation
+    feat(psr4): start Service_Weather PSR-4 conversion - core value objects
+    Consolidate code changes from 2.5.4 to 2.5.6
+    Update metadata and workflows for PHP 8 support
+    Development mode for Service_Weather-3.0.0alpha4
+    Released Service_Weather-3.0.0alpha3
+    Add CI job for satis repo update
+    Edit Unit Tests
+    Development mode for Service_Weather-3.0.0alpha4
+    Released Service_Weather-3.0.0alpha2
+    Development mode for Service_Weather-3.0.0alpha3
+    Released Service_Weather-3.0.0alpha1
+    Components updated the package files.
+    Update supported PHP versions and configuration names.
+    Update package.xml to get rid of non-existant files
+    fix phplint warnings
+    Standardize descriptions.
+    Add chomp character.
+    Remove wunderground driver now that it's dead.
+    Update the WWO endpoints, if anyone actuall wants to use these.
+    WIP to get OWM weather driver in a useable state.
+    Can't use searchLocations here, we need the full array.
+    This was changed to "appid".
+    Enable PHP 7.3 CI.
+    Update package definitions.
+    Fix getting exit code on PHP 7.2+.
+    package.xml must not contain empty <notes> tags.
+    Create CHANGES for all components.
+    Regenerate package.xml from changelog.yml.
+    Build changelog.yml from existing changelog(s).
+    Update .horde.yml with extended information.
+    Update composer.json.
+    Enable 7.2 builds.
+    PEAR on 5.6 and 7.0 is fixed.
+    Update file list
+    Move phpunit configuration to base directory.
+    Indicate markup language.
+    Update references to COPYING files.
+    Use LICENSE consistently and move to base directory.
+    Stop flooding #horde channel.
+    Use https URLs.
+    Remove incorrect links.
+    Giving in. No 5.6 or 7.0 for now.
+    This order works.
+    Install all dependencies but PECL extensions.
+    Hopefully this finally fixes Travis builds now.
+    PEAR roles are broken on Travis for these PHP versions.
+    Always discover channel manually, due to Travis bug.
+    Fix Travis tests.
+    Add Travis configuration and .gitignore files.
+    Updated
+    Update de translation.
+    Add type parameter to .horde.yml files.
+    Update composer information.
+    Updated composer definitions.
+    Update file lists.
+    Rename horde.yml files.
+    Update de translation.
+    Development mode for Horde_Service_Weather-2.5.5
 2.5.6:
   api: 1.5.0
   state:
@@ -315,28 +388,6 @@
   notes: |
     [jan] Update Japanese translation (Hiromi Kimura <hiromi@tac.tsukuba.ac.jp>).
     [mjr] Remove support for Google's dead weather API.
-2.0.0:
-  api: 1.1.0
-  state:
-    release: stable
-    api: stable
-  date: 2012-10-30
-  license:
-    identifier: BSD-2-Clause
-    uri: http://www.horde.org/licenses/bsd
-  notes: |
-    First stable release for Horde 5.
-2.0.0RC1:
-  api: 1.1.0
-  state:
-    release: beta
-    api: stable
-  date: 2012-10-26
-  license:
-    identifier: BSD-2-Clause
-    uri: http://www.horde.org/licenses/bsd
-  notes: |
-    [mjr] Catch XML parsing errors.
 2.0.0beta1:
   api: 1.1.0
   state:
@@ -359,6 +410,28 @@
     uri: http://www.horde.org/licenses/bsd
   notes: |
     First alpha release for Horde 5.
+2.0.0RC1:
+  api: 1.1.0
+  state:
+    release: beta
+    api: stable
+  date: 2012-10-26
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [mjr] Catch XML parsing errors.
+2.0.0:
+  api: 1.1.0
+  state:
+    release: stable
+    api: stable
+  date: 2012-10-30
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    First stable release for Horde 5.
 1.1.2:
   api: 1.1.0
   state:
@@ -406,39 +479,6 @@
     uri: http://www.horde.org/licenses/bsd
   notes: |
     [jan] Add Spanish translation (Manuel P. Ayala <mayala@unex.es>).
-1.0.0:
-  api: 1.0.0
-  state:
-    release: stable
-    api: stable
-  date: 2012-01-17
-  license:
-    identifier: BSD-2-Clause
-    uri: http://www.horde.org/licenses/bsd
-  notes: |
-    [mjr] Add snow and rain totals to wunderground driver.
-1.0.0RC2:
-  api: 1.0.0RC2
-  state:
-    release: beta
-    api: beta
-  date: 2011-12-21
-  license:
-    identifier: BSD-2-Clause
-    uri: http://www.horde.org/licenses/bsd
-  notes: |
-    [mjr] Fix using IP addresses for determining forecast location (Bug #10857)
-1.0.0RC1:
-  api: 1.0.0RC1
-  state:
-    release: beta
-    api: beta
-  date: 2011-12-13
-  license:
-    identifier: BSD-2-Clause
-    uri: http://www.horde.org/licenses/bsd
-  notes: |
-    [mjr] Use longer cache lifetime for non-changing values (Request #10851).
 1.0.0beta1:
   api: 1.0.0beta1
   state:
@@ -470,3 +510,36 @@
     uri: http://www.horde.org/licenses/bsd
   notes: |
     Initial release.
+1.0.0RC2:
+  api: 1.0.0RC2
+  state:
+    release: beta
+    api: beta
+  date: 2011-12-21
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [mjr] Fix using IP addresses for determining forecast location (Bug #10857)
+1.0.0RC1:
+  api: 1.0.0RC1
+  state:
+    release: beta
+    api: beta
+  date: 2011-12-13
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [mjr] Use longer cache lifetime for non-changing values (Request #10851).
+1.0.0:
+  api: 1.0.0
+  state:
+    release: stable
+    api: stable
+  date: 2012-01-17
+  license:
+    identifier: BSD-2-Clause
+    uri: http://www.horde.org/licenses/bsd
+  notes: |
+    [mjr] Add snow and rain totals to wunderground driver.

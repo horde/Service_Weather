@@ -1,8 +1,7 @@
 {
-    "minimum-stability": "dev",
     "name": "horde/service_weather",
     "description": "Weather service library",
-    "type": "library",
+    "type": "horde-library",
     "homepage": "https://www.horde.org/libraries/Horde_Service_Weather",
     "license": "BSD-2-Clause",
     "authors": [
@@ -12,37 +11,40 @@
             "role": "lead"
         }
     ],
-    "time": "2021-10-08",
-    "repositories": [
-        {
-            "type": "composer",
-            "url": "https://horde-satis.maintaina.com/"
-        }
-    ],
+    "time": "2026-03-07",
+    "repositories": [],
     "require": {
-        "php": "^8.1",
+        "horde/horde-installer-plugin": "dev-FRAMEWORK_6_0 || ^3 || ^2",
+        "php": "^7.4 || ^8",
         "horde/date": "^3 || dev-FRAMEWORK_6_0",
+        "horde/exception": "^3 || dev-FRAMEWORK_6_0",
         "horde/http": "^3 || dev-FRAMEWORK_6_0",
         "horde/translation": "^3 || dev-FRAMEWORK_6_0",
         "horde/url": "^3 || dev-FRAMEWORK_6_0"
     },
-    "require-dev": {
-        "phpunit/phpunit": "^11 || ^12"
-    },
+    "require-dev": {},
     "suggest": {
         "horde/test": "^3 || dev-FRAMEWORK_6_0"
     },
     "autoload": {
-        "psr-4": {
-            "Horde\\Service\\Weather\\": "src/"
-        },
         "psr-0": {
             "Horde_Service_Weather": "lib/"
+        },
+        "psr-4": {
+            "Horde\\Service\\Weather\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
             "Horde\\Service\\Weather\\Test\\": "test/"
+        }
+    },
+    "config": {
+        "allow-plugins": {}
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-FRAMEWORK_6_0": "3.x-dev"
         }
     }
 }
