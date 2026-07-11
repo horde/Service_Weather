@@ -11,7 +11,7 @@
             "role": "lead"
         }
     ],
-    "time": "2026-03-07",
+    "time": "2026-07-11",
     "repositories": [],
     "require": {
         "horde/horde-installer-plugin": "dev-FRAMEWORK_6_0 || ^3 || ^2",
@@ -25,13 +25,10 @@
         "psr/http-message": "^1 || ^2",
         "psr/simple-cache": "^3"
     },
-    "require-dev": {
-        "horde/db": "^3 || dev-FRAMEWORK_6_0",
-        "horde/http": "^3.1.0"
-    },
+    "require-dev": {},
     "suggest": {
-        "horde/db": "Needed by the legacy Horde_Service_Weather_Metar station-DB migrations shipped under migration/",
-        "horde/http": "PSR-18 client (Curl, Mock) and PSR-17 factories that satisfy this library out of the box",
+        "horde/db": "^3 || dev-FRAMEWORK_6_0",
+        "horde/http": "^3.1.0 || dev-FRAMEWORK_6_0",
         "horde/test": "^3 || dev-FRAMEWORK_6_0"
     },
     "autoload": {
@@ -44,11 +41,14 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Horde\\Service\\Weather\\Test\\": "test/"
+            "Horde\\Service\\Weather\\Test\\": "test/",
+            "Horde\\Service\\Weather\\Test\\Fixtures\\": "test/fixtures/"
         }
     },
     "config": {
-        "allow-plugins": {}
+        "allow-plugins": {
+            "horde/horde-installer-plugin": true
+        }
     },
     "extra": {
         "branch-alias": {
