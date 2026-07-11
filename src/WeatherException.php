@@ -17,6 +17,4 @@ use RuntimeException;
  * @license  http://www.horde.org/licenses/bsd BSD
  * @package  Service_Weather
  */
-class WeatherException extends RuntimeException
-{
-}
+class WeatherException extends RuntimeException {}

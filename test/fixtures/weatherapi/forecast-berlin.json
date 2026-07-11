@@ -1,0 +1,70 @@
+{
+  "location": {
+    "name": "Berlin",
+    "country": "Germany",
+    "lat": 52.52,
+    "lon": 13.41,
+    "tz_id": "Europe/Berlin",
+    "localtime_epoch": 1783600000,
+    "localtime": "2026-07-09 14:00"
+  },
+  "current": {
+    "temp_c": 21.5, "temp_f": 70.7,
+    "condition": {"text": "Partly cloudy", "code": 1003},
+    "wind_mph": 10.1, "wind_kph": 16.2, "wind_degree": 220, "wind_dir": "SW",
+    "pressure_mb": 1015.0, "pressure_in": 29.97,
+    "precip_mm": 0.0, "precip_in": 0.0,
+    "humidity": 62, "cloud": 50,
+    "feelslike_c": 21.0, "feelslike_f": 69.8,
+    "vis_km": 10.0, "vis_miles": 6.0, "uv": 6.0,
+    "gust_mph": 12.5, "gust_kph": 20.1,
+    "last_updated_epoch": 1783600000, "last_updated": "2026-07-09 14:00"
+  },
+  "forecast": {
+    "forecastday": [
+      {
+        "date": "2026-07-09", "date_epoch": 1783555200,
+        "day": {
+          "maxtemp_c": 23.0, "maxtemp_f": 73.4,
+          "mintemp_c": 17.0, "mintemp_f": 62.6,
+          "avgtemp_c": 20.5, "avgtemp_f": 68.9,
+          "maxwind_mph": 15.0, "maxwind_kph": 24.1,
+          "totalprecip_mm": 0.5, "totalprecip_in": 0.02,
+          "avghumidity": 60.0, "avgvis_km": 10.0,
+          "condition": {"text": "Partly cloudy", "code": 1003},
+          "uv": 6.0, "daily_chance_of_rain": 20
+        },
+        "hour": [
+          {"time_epoch": 1783555200, "time": "2026-07-09 00:00",
+           "temp_c": 17.0, "temp_f": 62.6,
+           "condition": {"text": "Clear", "code": 1000},
+           "wind_mph": 5.0, "wind_kph": 8.0, "wind_degree": 200, "wind_dir": "SSW",
+           "pressure_mb": 1015.0, "pressure_in": 29.97,
+           "precip_mm": 0.0, "snow_cm": 0.0, "humidity": 75, "cloud": 5,
+           "feelslike_c": 17.0, "vis_km": 10.0, "uv": 0.0,
+           "gust_mph": 7.0, "gust_kph": 11.3,
+           "chance_of_rain": 0},
+          {"time_epoch": 1783558800, "time": "2026-07-09 01:00",
+           "temp_c": 16.5, "temp_f": 61.7,
+           "condition": {"text": "Clear", "code": 1000},
+           "wind_mph": 5.5, "wind_kph": 8.9, "wind_degree": 205, "wind_dir": "SSW",
+           "pressure_mb": 1015.0, "pressure_in": 29.97,
+           "precip_mm": 0.0, "snow_cm": 0.0, "humidity": 78, "cloud": 5,
+           "feelslike_c": 16.5, "vis_km": 10.0, "uv": 0.0,
+           "gust_mph": 7.5, "gust_kph": 12.1,
+           "chance_of_rain": 0}
+        ]
+      },
+      {
+        "date": "2026-07-10", "date_epoch": 1783641600,
+        "day": {
+          "maxtemp_c": 26.0, "maxtemp_f": 78.8, "mintemp_c": 15.0, "mintemp_f": 59.0,
+          "avgtemp_c": 20.5, "avgtemp_f": 68.9, "avghumidity": 50.0,
+          "condition": {"text": "Sunny", "code": 1000},
+          "uv": 8.0, "totalprecip_mm": 0.0, "daily_chance_of_rain": 0
+        },
+        "hour": []
+      }
+    ]
+  }
+}

@@ -29,6 +29,7 @@
  * @property string lon           The longitude (if available).
  * @property string zip           The postal code.
  * @property string code          The internal identifier for the API.
+ * @deprecated 3.0.0 Use \Horde\Service\Weather\Weather instead. Will be removed in 4.0.0.
  */
 class Horde_Service_Weather_Station
 {

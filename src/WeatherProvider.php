@@ -19,7 +19,7 @@ use Horde\Service\Weather\ValueObject\Location;
  * @license  http://www.horde.org/licenses/bsd BSD
  * @package  Service_Weather
  */
-interface WeatherProviderInterface
+interface WeatherProvider
 {
     /**
      * Get current weather conditions.

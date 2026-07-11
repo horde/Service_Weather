@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Horde_Service_Weather tests
  *
@@ -10,18 +11,24 @@
  * @author     Michael J Rubinsky <mrubinsk@horde.org>
  * @license    http://www.horde.org/licenses/bsd BSD
  */
-namespace Horde\Service\Weather;
-use PHPUnit\Framework\TestCase;
-use \Horde_Service_Weather_Wwo;
-use \Horde_Http_Response_Mock;
-use \Horde_Service_Weather;
 
+namespace Horde\Service\Weather;
+
+use PHPUnit\Framework\TestCase;
+use Horde_Service_Weather_Wwo;
+use Horde_Http_Response_Mock;
+use Horde_Service_Weather;
+use Exception;
+
+/**
+ * @coversNothing
+ */
 class Wwov2Test extends TestCase
 {
-    protected $_mockUrls = array(
-        'https://api.worldweatheronline.com/free/v2/weather.ashx?q=39.660%2C-75.093&num_of_days=5&includeLocation=yes&extra=localObsTime&tp=24&showlocaltime=yes&showmap=yes&format=json&key=xxx' => 'wwov2.json');
+    protected $_mockUrls = [
+        'https://api.worldweatheronline.com/free/v2/weather.ashx?q=39.660%2C-75.093&num_of_days=5&includeLocation=yes&extra=localObsTime&tp=24&showlocaltime=yes&showmap=yes&format=json&key=xxx' => 'wwov2.json'];
 
-    protected $_unsupported = array('pressure_trend', 'logo_url', 'dewpoint');
+    protected $_unsupported = ['pressure_trend', 'logo_url', 'dewpoint'];
 
     public function testCurrentConditions()
     {
@@ -56,7 +63,7 @@ class Wwov2Test extends TestCase
         // Wind
         $this->assertEquals('SE', $conditions->wind_direction);
         $this->assertEquals(140, $conditions->wind_degrees);
-        $this->assertEquals('2015-08-28 23:53:00', (string)$conditions->time);
+        $this->assertEquals('2015-08-28 23:53:00', (string) $conditions->time);
 
         // Test unsupported properties
         foreach ($this->_unsupported as $property) {
@@ -80,7 +87,7 @@ class Wwov2Test extends TestCase
         $weather->units = Horde_Service_Weather::UNITS_STANDARD;
 
         $forecast = $weather->getForecast('clayton,nj');
-        $this->assertEquals('2015-08-28 23:53:00', (string)$forecast->getForecastTime());
+        $this->assertEquals('2015-08-28 23:53:00', (string) $forecast->getForecastTime());
 
         $dayOne = $forecast->getForecastDay(0);
         $this->assertInstanceOf('Horde_Service_Weather_Period_Wwov2', $dayOne);
@@ -114,11 +121,11 @@ class Wwov2Test extends TestCase
     protected function _getStub()
     {
         return new Horde_Service_Weather_Wwo(
-            array(
+            [
                 'apikey' => 'xxx',
                 'http_client' => $this->_getHttpClientStub(),
-                'apiVersion' => 2
-            )
+                'apiVersion' => 2,
+            ]
         );
     }
 
@@ -126,18 +133,18 @@ class Wwov2Test extends TestCase
     {
         $this->expectException('Exception');
 
-        switch ((string)$url) {
-        case 'https://api.worldweatheronline.com/free/v2/weather.ashx?q=clayton%2Cnj&num_of_days=5&includeLocation=yes&extra=localObsTime&tp=24&showlocaltime=yes&showmap=yes&format=json&key=xxx':
-            $stream = fopen(__DIR__ . '/fixtures/wwov2.json', 'r');
-            break;
-        case 'https://api.worldweatheronline.com/free/v2/search.ashx?timezone=yes&q=39.660%2C-75.093&num_of_results=10&format=json&key=xxx':
-            $stream = fopen(__DIR__ . '/fixtures/boston_location_wwo.json', 'r');
-            break;
-        case 'https://api.worldweatheronline.com/free/v2/weather.ashx?q=boston%2Cma&num_of_days=5&includeLocation=yes&extra=localObsTime&tp=24&showlocaltime=yes&showmap=yes&format=json&key=xxx':
-            $stream = fopen(__DIR__ . '/fixtures/wwov2.json', 'r');
-            break;
-        default:
-            throw new \Exception(sprintf('Invalid Url: %s', (string)$url));
+        switch ((string) $url) {
+            case 'https://api.worldweatheronline.com/free/v2/weather.ashx?q=clayton%2Cnj&num_of_days=5&includeLocation=yes&extra=localObsTime&tp=24&showlocaltime=yes&showmap=yes&format=json&key=xxx':
+                $stream = fopen(__DIR__ . '/fixtures/wwov2.json', 'r');
+                break;
+            case 'https://api.worldweatheronline.com/free/v2/search.ashx?timezone=yes&q=39.660%2C-75.093&num_of_results=10&format=json&key=xxx':
+                $stream = fopen(__DIR__ . '/fixtures/boston_location_wwo.json', 'r');
+                break;
+            case 'https://api.worldweatheronline.com/free/v2/weather.ashx?q=boston%2Cma&num_of_days=5&includeLocation=yes&extra=localObsTime&tp=24&showlocaltime=yes&showmap=yes&format=json&key=xxx':
+                $stream = fopen(__DIR__ . '/fixtures/wwov2.json', 'r');
+                break;
+            default:
+                throw new Exception(sprintf('Invalid Url: %s', (string) $url));
         }
         $response = new Horde_Http_Response_Mock($url, $stream);
         $response->code = 200;

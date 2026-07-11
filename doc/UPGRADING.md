@@ -1,697 +1,375 @@
-# Upgrading to PSR-4 Service_Weather
+# Upgrading Service_Weather
 
-This guide helps you migrate from the legacy PSR-0 API (Horde_Service_Weather) to the modern PSR-4 API (Horde\Service\Weather).
+This guide covers what changed at `3.0.0` and how existing callers
+move from the legacy PSR-0 API to the modern PSR-4 API.
 
-## Why Upgrade?
+For a catalog of what the modern API does not yet cover (both
+regressions from legacy and features new consumers might expect in
+2026), see [FEATURE_GAPS.md](FEATURE_GAPS.md).
 
-The PSR-4 API offers:
+## TL;DR
 
-- ✅ **Modern PHP 8.1+**: Type safety, enums, readonly properties
-- ✅ **Better Providers**: Open-Meteo (no API key), OpenWeatherMap, WeatherAPI.com, NWS
-- ✅ **Immutable Value Objects**: Temperature, Speed, Pressure with automatic unit conversion
-- ✅ **Standardized Data**: Consistent domain objects across all providers
-- ✅ **Simpler API**: Facade pattern with progressive disclosure
-- ✅ **Better Testing**: 127 comprehensive unit tests
-- ✅ **No API Key Required**: Use Open-Meteo or NWS for free
+- Legacy `Horde_Service_Weather*` classes still work at `3.x`. They
+  are `@deprecated` and will be removed at `4.0.0`. There is no
+  fixed date for `4.0.0`. Legacy APIs are largely defunct but the classes keep old consumers technically running.
+- New code should target `Horde\Service\Weather\Weather` and the capability-interface family under `Horde\Service\Weather\`.
+- WWO (WorldWeatherOnline) is retired. Use OpenWeatherMap or WeatherAPI as a replacement in modern code.
+- Aviation weather (METAR/TAF) is rebuilt against
+  `aviationweather.gov`'s JSON API. Text parsing was dropped.
+- Some legacy features are not yet ported (alerts,
+  provider-attribution metadata, meteorological helpers) and some
+  are deliberately not in the modern API (radar URLs, mutable-units,
+  translated condition names). See
+  [FEATURE_GAPS.md](FEATURE_GAPS.md) for the full inventory.
 
-## Quick Migration
+## What's in the modern API
 
-### Before (PSR-0 / Horde 5)
+Providers implement a thin core interface plus optional capability
+interfaces. Callers `instanceof`-check when they want an optional
+feature.
+
+Core interface: `Horde\Service\Weather\WeatherProvider`. Two methods:
+`getCurrentWeather(Location|string): CurrentWeather` and
+`getForecast(Location|string, int $days = 5): Forecast`.
+
+Capability interfaces (a provider implements some subset):
+
+| Interface | Purpose |
+|---|---|
+| `ForecastCapabilities` | Publish supported forecast lengths |
+| `HourlyForecast` | Intra-day granularity |
+| `LocationSearch` | Free-form location resolution / geocoding |
+| `StationLookup` | Look up observation stations by id or proximity |
+| `AirQualityProvider` | PM/gas concentrations and locale AQIs |
+| `AstronomyProvider` | Sun/moon rise, set, phase |
+| `AlertProvider` | Weather alerts / warnings; interface only at `3.0.0`, no provider implementations yet (see [FEATURE_GAPS.md](FEATURE_GAPS.md)) |
+
+Provider matrix as shipped at `3.0.0`:
+
+| Provider | Core | Forecast | Hourly | Search | Stations | Air quality | Astronomy |
+|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| Open-Meteo | ✓ | ✓ | ✓ |  |  | ✓ | ✓ (sun only) |
+| OpenWeatherMap | ✓ | ✓ | ✓ |  |  | ✓ |  |
+| WeatherAPI.com | ✓ | ✓ | ✓ | ✓ |  | ✓ | ✓ |
+| NWS | ✓ | ✓ | ✓ |  | ✓ |  |  |
+| METAR (aviationweather.gov) | ✓ | ✓ |  |  | ✓ |  |  |
+
+## HTTP is caller-supplied via PSR-18
+
+The library is transport-agnostic. Providers take a PSR-18 client
+(`Psr\Http\Client\ClientInterface`) plus a PSR-17 request factory
+(`Psr\Http\Message\RequestFactoryInterface`) on construction. Any
+compliant HTTP library plugs in directly: `horde/http` ships
+`Horde\Http\Client\Curl` and `Horde\Http\Client\Mock` (both PSR-18)
+along with `Horde\Http\RequestFactory` (PSR-17). Guzzle, Symfony
+HttpClient, PHP-HTTP's discovery layer and every other modern PHP
+HTTP library also implement these interfaces.
+
+Providers make GET requests only (weather APIs are read-only).
+Response parsing consumes `(string)$response->getBody()`.
+
+Tests can inject `Horde\Http\Client\Mock` directly, or use the
+`Horde\Service\Weather\Test\Support\MockHttpClient` helper (a thin
+extension over `Mock` that records inbound requests for header /
+count assertions).
+
+The library does not construct a concrete HTTP client on your behalf.
+
+## Caching
+
+`WeatherConfig` accepts an optional PSR-16 cache. When set, all
+provider HTTP calls are transparently deduplicated using the URL as
+the key. TTL is `WeatherConfig::$cacheLifetime` (default 1800s).
 
 ```php
-// Old API
-$weather = Horde_Service_Weather::factory('Owm', [
-    'apikey' => 'your-key',
-    'http_client' => new Horde_Http_Client()
-]);
-
-$weather->units = Horde_Service_Weather::UNITS_STANDARD;
-
-$conditions = $weather->getCurrentConditions('boston,ma');
-
-echo $conditions->temp . "°F\n";
-echo $conditions->condition . "\n";
-echo $conditions->humidity . "\n";
-
-$forecast = $weather->getForecast('boston,ma', 5, Horde_Service_Weather::FORECAST_TYPE_STANDARD);
-
-foreach ($forecast as $period) {
-    echo $period->high . "°F / " . $period->low . "°F\n";
-}
-```
-
-### After (PSR-4 / Horde 6)
-
-```php
-use Horde\Service\Weather\Weather;
-use Horde\Service\Weather\ValueObject\Units;
-
-// New API - simpler factory
-$weather = Weather::openWeatherMap('your-key');
-
-// Units configured via WeatherConfig
-$config = WeatherConfig::default()->withUnits(Units::IMPERIAL);
-$weather = Weather::openWeatherMap('your-key', config: $config);
-
-// Coordinate-based location (providers require coordinates)
-$current = $weather->getCurrentWeather('42.3601,-71.0589'); // Boston
-
-echo $current->temperature->toFahrenheit() . "°F\n";
-echo $current->condition->getDescription() . "\n";
-echo $current->humidity->format() . "\n";
-
-// Forecast with explicit days parameter
-$forecast = $weather->getForecast('42.3601,-71.0589', days: 5);
-
-foreach ($forecast->getPeriods() as $period) {
-    echo $period->highTemperature->toFahrenheit() . "°F / ";
-    echo $period->lowTemperature->toFahrenheit() . "°F\n";
-}
-```
-
-## Migration Guide by Component
-
-### 1. Factory / Initialization
-
-#### PSR-0 (Old)
-```php
-$weather = Horde_Service_Weather::factory('Owm', [
-    'apikey' => 'key',
-    'http_client' => $client,
-    'units' => Horde_Service_Weather::UNITS_METRIC
-]);
-```
-
-#### PSR-4 (New)
-```php
-use Horde\Service\Weather\Weather;
 use Horde\Service\Weather\ValueObject\WeatherConfig;
-use Horde\Service\Weather\ValueObject\Units;
-
-$config = WeatherConfig::default()->withUnits(Units::METRIC);
-$weather = Weather::openWeatherMap('key', $client, $config);
-
-// Or use Open-Meteo (no API key needed)
-$weather = Weather::openMeteo();
-```
-
-### 2. Provider Names
-
-| PSR-0 (Old) | PSR-4 (New) | Notes |
-|-------------|-------------|-------|
-| `'Owm'` | `Weather::openWeatherMap()` | Same provider, new API |
-| `'Wwo'` | `Weather::weatherApi()` | Similar service |
-| `'Metar'` | N/A | Use legacy PSR-0 API or contribute PSR-4 version |
-| N/A | `Weather::openMeteo()` | **New! No API key required** |
-| N/A | `Weather::nationalWeatherService()` | **New! US only, no key** |
-
-### 3. Locations
-
-#### PSR-0 (Old)
-```php
-// City name (geocoding happens internally)
-$conditions = $weather->getCurrentConditions('boston,ma');
-
-// ICAO code (METAR)
-$conditions = $weather->getCurrentConditions('KBOS');
-```
-
-#### PSR-4 (New)
-```php
-use Horde\Service\Weather\ValueObject\Location;
-
-// Coordinates required (most providers)
-$current = $weather->getCurrentWeather('42.3601,-71.0589');
-
-// Or use Location object
-$location = Location::fromCoordinates(42.3601, -71.0589);
-$current = $weather->getCurrentWeather($location);
-
-// City names (only some providers support)
-$location = Location::fromCity('Boston', 'MA');
-$current = $weather->getCurrentWeather($location); // May throw InvalidLocationException
-```
-
-**Why coordinates?** Modern weather APIs require precise coordinates. Use a geocoding service (like Google Geocoding API, OpenCage, or Nominatim) to convert city names to coordinates if needed.
-
-### 4. Current Weather / Conditions
-
-#### PSR-0 (Old)
-```php
-$conditions = $weather->getCurrentConditions('boston,ma');
-
-// Properties as plain values
-$conditions->temp;              // float
-$conditions->condition;         // string
-$conditions->humidity;          // string like "85%"
-$conditions->pressure;          // float
-$conditions->wind_speed;        // float
-$conditions->wind_direction;    // string like "NW"
-$conditions->visibility;        // float
-```
-
-#### PSR-4 (New)
-```php
-$current = $weather->getCurrentWeather('42.3601,-71.0589');
-
-// Properties as value objects with unit conversion
-$current->temperature;          // Temperature object
-$current->temperature->toCelsius();
-$current->temperature->toFahrenheit();
-
-$current->condition;            // WeatherCondition enum
-$current->condition->getDescription(); // "Partly Cloudy"
-
-$current->humidity;             // Humidity object
-$current->humidity->format();   // "85%"
-
-$current->pressure;             // Pressure object
-$current->pressure->getMillibars();
-$current->pressure->getInchesOfMercury();
-
-$current->wind;                 // Wind object
-$current->wind->speed;          // Speed object
-$current->wind->direction;      // WindDirection enum
-
-$current->visibility;           // float (km)
-$current->cloudCover;           // int (0-100%)
-$current->uvIndex;              // float|null
-```
-
-### 5. Forecast
-
-#### PSR-0 (Old)
-```php
-$forecast = $weather->getForecast(
-    'boston,ma',
-    5,  // days
-    Horde_Service_Weather::FORECAST_TYPE_STANDARD
-);
-
-// Iterate periods
-foreach ($forecast as $period) {
-    $period->high;          // float
-    $period->low;           // float
-    $period->conditions;    // string
-    $period->precipitation_percent; // int
-}
-```
-
-#### PSR-4 (New)
-```php
-$forecast = $weather->getForecast('42.3601,-71.0589', days: 5);
-
-// Get periods array
-foreach ($forecast->getPeriods() as $period) {
-    $period->date;                    // DateTimeImmutable
-    $period->highTemperature;         // Temperature object
-    $period->lowTemperature;          // Temperature object
-    $period->temperature;             // Temperature (average)
-    $period->condition;               // WeatherCondition enum
-    $period->precipitationProbability; // float (0.0-1.0)
-    $period->precipitationAmount;     // float (mm)
-}
-
-// Alternative access
-$period = $forecast->getPeriod(0);  // First day
-$count = $forecast->getPeriodsCount(); // Number of periods
-```
-
-### 6. Units
-
-#### PSR-0 (Old)
-```php
-// Set units property
-$weather->units = Horde_Service_Weather::UNITS_STANDARD;  // Fahrenheit
-$weather->units = Horde_Service_Weather::UNITS_METRIC;    // Celsius
-
-// Values returned in selected units
-$conditions->temp; // Already converted
-```
-
-#### PSR-4 (New)
-```php
-use Horde\Service\Weather\ValueObject\Units;
-use Horde\Service\Weather\ValueObject\WeatherConfig;
-
-// Configure units upfront
-$config = WeatherConfig::default()->withUnits(Units::IMPERIAL);
-$weather = Weather::openMeteo(config: $config);
-
-// Or convert on demand
-$temp = $current->temperature;
-$temp->toCelsius();     // Always available
-$temp->toFahrenheit();  // Always available
-$temp->toKelvin();      // Always available
-
-// Format with specific units
-$temp->format(Units::METRIC);    // "20.5°C"
-$temp->format(Units::IMPERIAL);  // "68.9°F"
-$temp->format(Units::STANDARD);  // "293.7K"
-```
-
-### 7. Exceptions
-
-#### PSR-0 (Old)
-```php
-try {
-    $weather->getCurrentConditions('invalid');
-} catch (Horde_Service_Weather_Exception $e) {
-    // Generic exception
-}
-```
-
-#### PSR-4 (New)
-```php
-use Horde\Service\Weather\Exception\ApiException;
-use Horde\Service\Weather\Exception\InvalidApiKeyException;
-use Horde\Service\Weather\Exception\InvalidLocationException;
-use Horde\Service\Weather\Exception\RateLimitException;
-
-try {
-    $current = $weather->getCurrentWeather($location);
-} catch (InvalidApiKeyException $e) {
-    // API key invalid or missing
-} catch (InvalidLocationException $e) {
-    // Location format invalid
-} catch (RateLimitException $e) {
-    // Rate limit exceeded
-} catch (ApiException $e) {
-    // General API error
-}
-
-// All extend WeatherException which extends RuntimeException
-```
-
-### 8. Translation / Internationalization
-
-#### PSR-0 (Old)
-```php
-// Used Horde_Service_Weather_Translation internally
-$conditions->condition; // Already translated string
-```
-
-#### PSR-4 (New)
-```php
-// Use WeatherCondition enum with getDescription()
-$current->condition->getDescription(); // "Partly Cloudy" (English)
-
-// Configure language for provider
-$config = WeatherConfig::default()->withLanguage('es');
-$weather = Weather::openWeatherMap('key', config: $config);
-
-// Provider returns localized descriptions (if supported)
-```
-
-### 9. Station / Location Metadata
-
-#### PSR-0 (Old)
-```php
-$station = $weather->getStation();
-$station->name;     // "Boston, MA"
-$station->sunrise;  // Horde_Date
-$station->sunset;   // Horde_Date
-```
-
-#### PSR-4 (New)
-```php
-// Station metadata not directly exposed in PSR-4 API
-// Location available from weather data
-$current->location;         // Location object
-$current->location->name;   // City name (if available)
-$current->location->getDisplayName(); // Formatted string
-
-// Sunrise/sunset: Use separate astronomy API or provider-specific extensions
-```
-
-### 10. Date/Time Handling
-
-#### PSR-0 (Old)
-```php
-// Used Horde_Date
-$conditions->time;  // Horde_Date object
-$period->date;      // Horde_Date object
-```
-
-#### PSR-4 (New)
-```php
-// Uses native DateTimeImmutable
-$current->observationTime;  // DateTimeImmutable
-$period->date;              // DateTimeImmutable
-
-// Full DateTime API available
-$current->observationTime->format('Y-m-d H:i:s');
-$current->observationTime->getTimestamp();
-$current->observationTime->diff($period->date);
-```
-
-## Provider-Specific Migration
-
-### From OpenWeatherMap (Owm)
-
-```php
-// PSR-0
-$weather = Horde_Service_Weather::factory('Owm', ['apikey' => 'key']);
-$conditions = $weather->getCurrentConditions('boston,ma');
-
-// PSR-4
-$weather = Weather::openWeatherMap('key');
-$current = $weather->getCurrentWeather('42.3601,-71.0589');
-```
-
-### From WorldWeatherOnline (Wwo)
-
-```php
-// PSR-0
-$weather = Horde_Service_Weather::factory('Wwo', ['apikey' => 'key']);
-
-// PSR-4 - use WeatherAPI.com (similar service)
-$weather = Weather::weatherApi('key');
-
-// Or keep using PSR-0 legacy API for WWO
-$weather = Horde_Service_Weather::factory('Wwo', ['apikey' => 'key']);
-```
-
-### From METAR/TAF
-
-```php
-// PSR-0 (Aviation weather)
-$weather = Horde_Service_Weather::factory('Metar', [
-    'metar_path' => '/path/to/metar/files'
-]);
-$conditions = $weather->getCurrentConditions('KBOS');
-
-// PSR-4 - No direct equivalent yet
-// Option 1: Continue using PSR-0 METAR provider
-$weather = Horde_Service_Weather::factory('Metar', [...]);
-
-// Option 2: Use Open-Meteo for general weather
-$weather = Weather::openMeteo();
-$current = $weather->getCurrentWeather('42.3601,-71.0589');
-```
-
-### From Wunderground
-
-```php
-// PSR-0 (DEPRECATED - API shut down by IBM)
-$weather = Horde_Service_Weather::factory('WeatherUnderground', ['apikey' => 'key']);
-
-// PSR-4 - Use Open-Meteo or OpenWeatherMap instead
-$weather = Weather::openMeteo(); // Free, no key
-// or
-$weather = Weather::openWeatherMap('key'); // Industry standard
-```
-
-## Common Patterns
-
-### Pattern 1: Temperature Display
-
-```php
-// PSR-0
-$tempF = $conditions->temp;
-echo "$tempF°F";
-
-// PSR-4
-$temp = $current->temperature;
-echo $temp->toFahrenheit() . "°F";
-// or
-echo $temp->format(Units::IMPERIAL); // "68.9°F"
-```
-
-### Pattern 2: Conditional Weather Display
-
-```php
-// PSR-0
-if (stripos($conditions->condition, 'rain') !== false) {
-    echo "Bring umbrella!";
-}
-
-// PSR-4
-use Horde\Service\Weather\ValueObject\WeatherCondition;
-
-if ($current->condition === WeatherCondition::RAIN) {
-    echo "Bring umbrella!";
-}
-
-// Or match multiple conditions
-if (in_array($current->condition, [
-    WeatherCondition::RAIN,
-    WeatherCondition::DRIZZLE,
-    WeatherCondition::THUNDERSTORM
-])) {
-    echo "Bring umbrella!";
-}
-```
-
-### Pattern 3: Wind Information
-
-```php
-// PSR-0
-echo "Wind: {$conditions->wind_direction} at {$conditions->wind_speed} mph";
-
-// PSR-4
-$wind = $current->wind;
-echo "Wind: {$wind->direction->value} at ";
-echo $wind->speed->toMilesPerHour() . " mph";
-
-// With gusts
-if ($wind->hasGusts()) {
-    echo " (gusts to {$wind->gusts->toMilesPerHour()} mph)";
-}
-```
-
-### Pattern 4: Forecast Summary
-
-```php
-// PSR-0
-foreach ($forecast as $day) {
-    echo "{$day->high}°F / {$day->low}°F - {$day->conditions}\n";
-}
-
-// PSR-4
-foreach ($forecast->getPeriods() as $period) {
-    echo $period->date->format('D') . ": ";
-    echo $period->highTemperature->toFahrenheit() . "°F / ";
-    echo $period->lowTemperature->toFahrenheit() . "°F - ";
-    echo $period->condition->getDescription() . "\n";
-}
-```
-
-## Configuration Migration
-
-### PSR-0 Configuration
-
-```php
-$config = [
-    'apikey' => 'your-key',
-    'http_client' => new Horde_Http_Client(),
-    'cache' => $cache,
-    'cache_lifetime' => 1800,
-];
-
-$weather = Horde_Service_Weather::factory('Owm', $config);
-$weather->units = Horde_Service_Weather::UNITS_METRIC;
-```
-
-### PSR-4 Configuration
-
-```php
-use Horde\Service\Weather\Weather;
-use Horde\Service\Weather\ValueObject\WeatherConfig;
-use Horde\Service\Weather\ValueObject\Units;
-use Horde\Http\Client;
-
-$httpClient = new Client([
-    'timeout' => 30,
-]);
 
 $config = WeatherConfig::default()
-    ->withApiKey('your-key')
-    ->withUnits(Units::METRIC)
-    ->withLanguage('en')
-    ->withTimeout(30)
-    ->withCacheLifetime(1800);
+    ->withCache($psr16Cache)
+    ->withCacheLifetime(900);
+
+$weather = Weather::openMeteo($httpClient, $config);
+```
+
+No cache is added when `withCache()` is not called. Existing callers
+see no behavioral change.
+
+## Minimum PHP
+
+The modern API requires PHP 8.1+ (readonly properties, enums, named
+arguments, new in initializers). `composer.json` declares
+`php: ^8.1` and this is not negotiable inside the modern namespace.
+The legacy PSR-0 classes still tolerate PHP 7.4 in principle but
+are frozen at `3.x`.
+
+## Migrating an existing caller
+
+### Simple current-weather lookup
+
+Before:
+
+```php
+$weather = Horde_Service_Weather::factory('Owm', [
+    'apikey' => 'your-key',
+    'http_client' => new Horde_Http_Client(),
+]);
+$weather->units = Horde_Service_Weather::UNITS_STANDARD;
+$conditions = $weather->getCurrentConditions('boston,ma');
+echo $conditions->temp;
+echo $conditions->condition;
+```
+
+After:
+
+```php
+use Horde\Service\Weather\Weather;
+use Horde\Service\Weather\ValueObject\Location;
+use Horde\Service\Weather\ValueObject\Units;
+use Horde\Service\Weather\ValueObject\WeatherConfig;
 
 $weather = Weather::openWeatherMap(
-    $config->apiKey,
     $httpClient,
-    $config
+    'your-key',
+    WeatherConfig::default()->withUnits(Units::IMPERIAL),
 );
-
-// Or simpler
-$weather = Weather::openWeatherMap('your-key');
+$current = $weather->getCurrentWeather(
+    Location::fromCoordinates(42.3601, -71.0589)
+);
+echo $current->temperature->toFahrenheit();
+echo $current->condition->getDescription();
 ```
 
-## Testing Your Migration
+### Notable shape changes
 
-### 1. Side-by-Side Comparison
+- Providers are constructed via facade factories (`Weather::openMeteo()`,
+  `Weather::openWeatherMap()`, `Weather::weatherApi()`,
+  `Weather::nationalWeatherService()`, `Weather::metar()`) or by
+  directly instantiating the provider class.
+- `Location` is a value object. Prefer coordinate construction
+  (`Location::fromCoordinates(lat, lon)`) when possible. Legacy
+  string forms (`"city,country"`) still work via `Location::fromCity()`
+  but leave lat/lon at placeholder values until a geocoder fills them.
+  Only WeatherAPI silently accepts a name-only location today; every
+  other provider throws `InvalidLocationException` on a `fromCity()`
+  location that has no coordinates. Callers who want geocoded
+  city-name lookups should route through
+  `LocationSearch::searchLocations()` on WeatherAPI, or through a
+  dedicated geocoder at the application layer.
+- `Units` is now an enum (`Units::METRIC`, `Units::IMPERIAL`,
+  `Units::STANDARD`). It's set on `WeatherConfig` at construction,
+  not mutated on the provider afterwards. Callers who need to switch
+  units re-instantiate the provider with a new
+  `$config->withUnits(...)`.
+- Domain objects (`CurrentWeather`, `Forecast`, `ForecastPeriod`,
+  `Station`, `WeatherAlert`, `AirQuality`, `Astronomy`) are
+  `final readonly` classes. Fields are typed (`Temperature`,
+  `Speed`, `Pressure`, `Humidity` value objects; `WeatherCondition`
+  and other enums).
+- `Forecast` is `Countable` and iterable via `foreach`.
+- Optional fields (dewpoint, pressureTrend, uvIndex, snowfallAmount,
+  station reference etc.) surface as `null` when the provider does
+  not populate them. Legacy code returned `false` in some slots; the
+  new API uses `null` universally.
+
+### Design changes with no legacy equivalent
+
+Small legacy features that were deliberately not carried into the
+modern API. These are not gaps. The modern shape is the intended
+long-term design.
+
+- **`Forecast::limitLength($days)`**: no equivalent. Callers slice
+  `$forecast->periods` themselves with `array_slice()`.
+- **`$forecast->fields` bitmask**: no equivalent. Legacy templates
+  read the `FORECAST_FIELD_*` bitmask to omit rows for unpopulated
+  fields. Modern `ForecastPeriod` fields are nullable-typed; consumers
+  null-check per field. Same information, different pattern.
+- **Translated condition names**: no equivalent. Legacy ran condition
+  names through `Horde_Service_Weather_Translation::t()` (Horde
+  gettext). The modern API deliberately excludes translation.
+  `WeatherCondition::getDescription()` returns English literals.
+  Translate at the presentation layer with your app's i18n system.
+- **`Alerts_Base` iterator**: no equivalent. Legacy returned alerts
+  as `Horde_Service_Weather_Alerts_Base implements IteratorAggregate`.
+  Modern `AlertProvider::getAlerts()` returns `array<WeatherAlert>`.
+- **`Exception\InvalidProperty`**: no equivalent. Legacy threw this
+  from `Current_Base::__get()` when a property was not populated for
+  a given provider. Modern API surfaces unpopulated fields as `null`
+  without an exception.
+- **Mutable `$driver->units`**: no equivalent. Legacy allowed
+  changing the provider's rendering by writing to a public property
+  between calls. Modern `WeatherConfig` is immutable; see the
+  `Units` bullet above.
+- **`CurrentWeather::$feelsLike` semantics are provider-defined.**
+  OpenMeteo populates from ECMWF apparent temperature (includes
+  humidity and wind). OpenWeatherMap uses its own model. WeatherAPI
+  uses its own. NWS reports wind-chill and heat-index separately.
+  Trust `$feelsLike` when populated; fall back to derivation helpers
+  only when the provider returns null.
+- **NWS and METAR share the ICAO station space**. Both providers
+  understand ICAO codes and both return `Station` objects. A caller
+  who asks for `KJFK` can hit either. The library does not surface
+  "these providers cover the same station space"; use whichever
+  provider matches your data quality needs (NWS has richer
+  observation fields; METAR has richer text-based aviation data).
+
+The core `WeatherProvider` interface currently still accepts
+`Location|string` on `getCurrentWeather()` and `getForecast()`.
+String support is preserved for backward compatibility with
+in-development callers and tightens to `Location` only at `4.0.0`.
+
+### City-name lookups
+
+WeatherAPI is the only provider that accepts free-form city names as
+a query string directly. For every other provider, resolve the string
+to coordinates first. Options:
+
+- `WeatherApi` implements `LocationSearch::searchLocations($query)`;
+  the first result is usable as a `Location`.
+- Use a dedicated geocoder (Nominatim, Google Geocoding, OpenCage or
+  another) in your application layer, then pass a
+  `Location::fromCoordinates(lat, lon)` to the provider.
+
+### METAR / TAF (aviation weather)
+
+The modern Metar provider hits `aviationweather.gov`'s JSON API
+directly. Text parsing was removed; the upstream endpoint returns
+pre-parsed fields.
 
 ```php
-// Run both APIs and compare results
-$oldWeather = Horde_Service_Weather::factory('Owm', ['apikey' => $key]);
-$newWeather = Weather::openWeatherMap($key);
-
-$oldConditions = $oldWeather->getCurrentConditions('boston,ma');
-$newCurrent = $newWeather->getCurrentWeather('42.3601,-71.0589');
-
-// Compare temperatures (should be within 0.1°C)
-assert(abs($oldConditions->temp - $newCurrent->temperature->toFahrenheit()) < 0.2);
-```
-
-### 2. Unit Tests
-
-```php
-use PHPUnit\Framework\TestCase;
-
-class WeatherMigrationTest extends TestCase
-{
-    public function testOpenMeteoWorksWithoutApiKey(): void
-    {
-        $weather = Weather::openMeteo();
-        $current = $weather->getCurrentWeather('42.3601,-71.0589');
-
-        $this->assertInstanceOf(CurrentWeather::class, $current);
-        $this->assertNotNull($current->temperature);
-    }
-
-    public function testTemperatureConversion(): void
-    {
-        $weather = Weather::openMeteo();
-        $current = $weather->getCurrentWeather('42.3601,-71.0589');
-
-        $celsius = $current->temperature->toCelsius();
-        $fahrenheit = $current->temperature->toFahrenheit();
-
-        // Verify conversion is correct
-        $this->assertEqualsWithDelta(
-            $celsius * 9/5 + 32,
-            $fahrenheit,
-            0.1
-        );
-    }
-}
-```
-
-## Backward Compatibility
-
-The PSR-4 API is designed to coexist with the PSR-0 API. You can migrate gradually:
-
-```php
-// Use PSR-4 for new code
 use Horde\Service\Weather\Weather;
-$newWeather = Weather::openMeteo();
 
-// Keep PSR-0 for legacy code
-$oldWeather = Horde_Service_Weather::factory('Metar', [...]);
-
-// Both work in the same application
+$weather = Weather::metar($httpClient);
+$provider = $weather->getProvider();  // returns the Metar instance
+$current = $provider->getCurrentWeatherByIcao('KJFK');
+$forecast = $provider->getForecastByIcao('KJFK');
+$station = $provider->getStation('KJFK');
 ```
 
-## Troubleshooting
-
-### "Location must have coordinates"
-
-**Problem:** PSR-4 providers require coordinates, not city names.
-
-**Solution:** Use a geocoding service to convert city names to coordinates:
+`aviationweather.gov` requests a custom `User-Agent`. Set it once:
 
 ```php
-// Option 1: Use OpenCage Geocoding API
-$geocode = file_get_contents("https://api.opencagedata.com/geocode/v1/json?q=Boston,MA&key=YOUR_KEY");
-$data = json_decode($geocode, true);
-$lat = $data['results'][0]['geometry']['lat'];
-$lon = $data['results'][0]['geometry']['lng'];
-
-// Option 2: Use Nominatim (OpenStreetMap)
-$geocode = file_get_contents("https://nominatim.openstreetmap.org/search?q=Boston,MA&format=json");
-$data = json_decode($geocode, true);
-$lat = $data[0]['lat'];
-$lon = $data[0]['lon'];
-
-$current = $weather->getCurrentWeather("$lat,$lon");
+$config = WeatherConfig::default()->withUserAgent('my-app/1.0 (+https://example.com)');
+$weather = Weather::metar($httpClient, $config);
 ```
 
-### "Invalid API key"
-
-**Problem:** API key format or provider mismatch.
-
-**Solution:**
-- Verify your API key is for the correct provider
-- Check that the key is active and has remaining quota
-- Use Open-Meteo or NWS if you don't need an API key
-
-### "Property not available"
-
-**Problem:** Accessing a property that's null (provider-dependent).
-
-**Solution:** Always check for null before accessing optional properties:
+Location-by-coordinate also works. The provider's bbox query finds
+nearby ICAO stations, filters out non-aviation observation points
+(buoys) and picks the closest:
 
 ```php
-// PSR-0 - properties always exist (may be empty)
-if ($conditions->humidity) {
-    echo $conditions->humidity;
-}
-
-// PSR-4 - use null coalescing
-if ($current->humidity !== null) {
-    echo $current->humidity->format();
-}
-
-// Or with null-safe operator
-echo $current->humidity?->format() ?? 'N/A';
+$current = $weather->getCurrentWeather(
+    Location::fromCoordinates(40.7128, -74.0060)
+);
 ```
 
-### Performance Concerns
+### WWO retirement
 
-**Problem:** Worried about object creation overhead.
+`Horde_Service_Weather_Wwo` (WorldWeatherOnline) is not in the modern
+API. Callers that used WWO for global commercial weather should move
+to `Weather::openWeatherMap()` or `Weather::weatherApi()`. Both cover
+WWO's use case with more generous free tiers.
 
-**Solution:** Value objects are lightweight and readonly. Benchmark shows negligible overhead:
+The legacy `Wwo` and `Wwov2` classes remain in `lib/` at `3.x` for
+existing callers, `@deprecated`-tagged. They will be removed at
+`4.0.0` along with the rest of `lib/`.
 
-```php
-// Benchmark (1000 iterations)
-// PSR-0: ~0.05ms per request
-// PSR-4: ~0.06ms per request
-// Difference: 0.01ms (20% slower but more type-safe)
-```
+## Consumer-side migration notes
 
-## Need Help?
+### timeobjects `Weather` driver
 
-- **Documentation**: See README.md for complete API reference
-- **Examples**: Check the examples/ directory (if available)
-- **Tests**: Review test/unit/ for usage patterns
-- **Issues**: Report bugs at https://github.com/horde/Service_Weather/issues
+`timeobjects/src/Driver/Weather.php` currently consumes
+`Horde_Weather` from the injector and treats the returned provider
+as mutable (`$driver->units = ...`). The modern replacement:
 
-## Summary Checklist
+- Construct one provider per request via the facade (or DI a
+  `WeatherProvider` factory).
+- Pass a `WeatherConfig` with `Units` set at construction rather than
+  mutating afterwards.
+- Read from `Forecast` via `foreach` and `->periods[]` instead of
+  the legacy iterator + `->detail` pair. `Forecast::$detail` still
+  exists but is a `ForecastDetail` enum (`DAILY` or `DETAILED`), not
+  an int constant.
+- Optional fields (precipitation probability, humidity, wind
+  direction) are `null` on absence, not `false`.
 
-- [ ] Replace `Horde_Service_Weather::factory()` with `Weather::factoryMethod()`
-- [ ] Update location strings to coordinate format "lat,lon"
-- [ ] Replace property access with value object methods
-- [ ] Update unit conversions to use value object methods
-- [ ] Replace string conditions with WeatherCondition enum
-- [ ] Update exception handling to catch specific exceptions
-- [ ] Replace Horde_Date with DateTimeImmutable
-- [ ] Update configuration to use WeatherConfig
-- [ ] Test with Open-Meteo (no API key needed)
-- [ ] Consider switching to providers with better free tiers
+### `base/lib/Block/Weather`
 
-## Recommended Migration Path
+The legacy weather block reads `$driver->units`, calls
+`getSupportedForecastLengths()` and consumes a `getUnits($x)` label
+map. Modern equivalents:
 
-1. **Start with Open-Meteo** - No API key required, perfect for testing
-2. **Update one component at a time** - Migrate incrementally
-3. **Use type hints** - Let PHP catch migration issues early
-4. **Add tests** - Verify behavior matches expectations
-5. **Review null handling** - Many properties are now nullable
-6. **Update documentation** - Document your API usage patterns
+- Units are `WeatherConfig::$units`; the block should build its own
+  `WeatherConfig` from user prefs.
+- `WeatherProvider` capability check for `ForecastCapabilities` gives
+  the length list.
+- `Units::getLabels()` returns the temp/wind/pressure/visibility/
+  precipitation label suffixes.
+- Sunrise/sunset live on `Station` (via `CurrentWeather::$station`)
+  when the provider is station-based (NWS, METAR). For cloud
+  providers, use `AstronomyProvider::getAstronomy()` when supported.
 
-## Advantages of Completing Migration
+### `base/lib/Block/Metar`
 
-Once migrated, you'll benefit from:
+The legacy Metar block has a station-picker UI backed by
+`Horde_Db` and consumes decoded METAR remark structures via
+`->getRawData()`. `aviationweather.gov`'s JSON API returns different
+fields and has no "browse all stations" endpoint.
 
-- **Type Safety**: Catch errors at development time, not runtime
-- **Better IDE Support**: Full autocomplete and type hints
-- **Immutability**: No accidental data mutations
-- **Unit Conversion**: Convert between units without manual calculation
-- **Standardization**: Consistent data structures across providers
-- **Modern PHP**: Leverage PHP 8.1+ features (enums, readonly, named arguments)
-- **Better Testing**: Comprehensive test suite ensures reliability
-- **Free Options**: Use Open-Meteo or NWS without API keys
+A modern replacement block would either:
+
+- Ship its own curated ICAO list (OurAirports data is one option), or
+- Accept free-text ICAO codes with client-side autocomplete.
+
+Detailed METAR remarks (sea-level pressure, precipitation totals,
+sensor status, pressure tendency) are not surfaced by the modern
+Metar provider. Applications that need them should either parse the
+`rawOb` field (accessible via `CurrentWeather::$providerData`) or
+keep using the legacy `Horde_Service_Weather_Metar` until `4.0.0`.
+
+## Constants and enums
+
+Legacy constants map to modern enums:
+
+| Legacy | Modern |
+|---|---|
+| `Horde_Service_Weather::UNITS_METRIC` | `Units::METRIC` |
+| `Horde_Service_Weather::UNITS_STANDARD` | `Units::STANDARD` |
+| `Horde_Service_Weather::UNITS_IMPERIAL` | `Units::IMPERIAL` (new) |
+| `Horde_Service_Weather::FORECAST_*DAY` | integer literal to `getForecast(..., $days)` |
+| `Horde_Service_Weather::FORECAST_TYPE_STANDARD` | `ForecastDetail::DAILY` |
+| `Horde_Service_Weather::FORECAST_TYPE_DETAILED` | `ForecastDetail::DETAILED` |
+| `Horde_Service_Weather::SEARCHTYPE_IP` | `SearchType::IP_ADDRESS` |
+| `Horde_Service_Weather::SEARCHTYPE_STANDARD` | `SearchType::ANY` or the more specific `CITY`/`ZIP` |
+
+## Bug fixes in the modern API
+
+Bugs that existed in the March 2026 pre-release and were fixed before
+`3.0.0`:
+
+- Open-Meteo air-quality query sent `uk_aqi` which is not a valid
+  Open-Meteo parameter; every `getAirQuality()` call would fail with
+  a parameter-validation error. Fixed by dropping `uk_aqi` from the
+  request. `AirQuality::$ukDaqi` remains available for other
+  providers.
+- NWS forecast parsers threw on 16-point compass directions (`NNE`,
+  `ENE` etc.) because `WindDirection::from()` only accepts 8-point
+  values. Fixed with a `parseWindDirection()` helper that folds
+  16-point strings to the nearest 8-point value.
+- `Location::__construct` was private but WeatherAPI's search
+  parsers called `new Location(...)` directly, throwing at runtime.
+  Fixed by adding a public `Location::fromGeocoded()` factory.
+- Providers imported `Horde\Http\Client` (which is not a real class
+  in the modern `horde/http` tree). The March code stood up a
+  library-scoped `Horde\Service\Weather\HttpClient` interface to
+  work around this. `3.0.0` targets standard PSR-18
+  (`Psr\Http\Client\ClientInterface`) plus PSR-17 factories directly.
+
+## Timeline
+
+- `3.0.0`: legacy `lib/` and modern `src/` ship side by side. `lib/`
+  is `@deprecated`.
+- `3.x` minor releases: No bug fixes on `lib/`. Feature growth on
+  `src/`.
+- `4.0.0`: `lib/` deleted. No fixed date. Cut when the last in-tree
+  consumer has flipped or explicit product decision is made to force
+  the retirement.

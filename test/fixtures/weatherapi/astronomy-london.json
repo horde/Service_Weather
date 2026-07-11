@@ -1,0 +1,18 @@
+{
+  "location": {
+    "name": "London", "country": "United Kingdom",
+    "lat": 51.52, "lon": -0.11,
+    "tz_id": "Europe/London",
+    "localtime_epoch": 1783600000, "localtime": "2026-07-09 13:00"
+  },
+  "astronomy": {
+    "astro": {
+      "sunrise": "04:47 AM",
+      "sunset": "09:20 PM",
+      "moonrise": "07:15 PM",
+      "moonset": "03:22 AM",
+      "moon_phase": "Waxing Gibbous",
+      "moon_illumination": "72"
+    }
+  }
+}

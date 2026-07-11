@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Horde_Service_Weather tests
  *
@@ -10,19 +11,25 @@
  * @author     Michael J Rubinsky <mrubinsk@horde.org>
  * @license    http://www.horde.org/licenses/bsd BSD
  */
-namespace Horde\Service\Weather;
-use PHPUnit\Framework\TestCase;
-use \Horde_Service_Weather_Wwo;
-use \Horde_Service_Weather;
-use \Horde_Http_Response_Mock;
 
+namespace Horde\Service\Weather;
+
+use PHPUnit\Framework\TestCase;
+use Horde_Service_Weather_Wwo;
+use Horde_Service_Weather;
+use Horde_Http_Response_Mock;
+use Exception;
+
+/**
+ * @coversNothing
+ */
 class WwoTest extends TestCase
 {
-    protected $_mockUrls = array(
+    protected $_mockUrls = [
         'http://api.worldweatheronline.com/free/v1/weather.ashx?q=boston%2Cma&num_of_days=5&includeLocation=yes&timezone=yes&extra=localObsTime&format=json&key=xxx' => 'boston_wwo.json',
-        'http://api.worldweatheronline.com/free/v1/search.ashx?timezone=yes&q=42.360%2C-71.060&num_of_results=10&format=json&key=xxx' => 'boston_location_wwo.json');
+        'http://api.worldweatheronline.com/free/v1/search.ashx?timezone=yes&q=42.360%2C-71.060&num_of_results=10&format=json&key=xxx' => 'boston_location_wwo.json'];
 
-    protected $_unsupported = array('pressure_trend', 'logo_url', 'dewpoint', 'wind_gust');
+    protected $_unsupported = ['pressure_trend', 'logo_url', 'dewpoint', 'wind_gust'];
 
     public function testCurrentConditions()
     {
@@ -55,7 +62,7 @@ class WwoTest extends TestCase
         // Wind
         $this->assertEquals('SSW', $conditions->wind_direction);
         $this->assertEquals(210, $conditions->wind_degrees);
-        $this->assertEquals('2014-04-01 18:34:00', (string)$conditions->time);
+        $this->assertEquals('2014-04-01 18:34:00', (string) $conditions->time);
 
         // Test unsupported properties
         foreach ($this->_unsupported as $property) {
@@ -81,7 +88,7 @@ class WwoTest extends TestCase
         $weather->units = Horde_Service_Weather::UNITS_STANDARD;
 
         $forecast = $weather->getForecast('boston,ma');
-        $this->assertEquals('2014-04-01 18:34:00', (string)$forecast->getForecastTime());
+        $this->assertEquals('2014-04-01 18:34:00', (string) $forecast->getForecastTime());
 
         $dayOne = $forecast->getForecastDay(0);
         $this->assertInstanceOf('Horde_Service_Weather_Period_Base', $dayOne);
@@ -129,10 +136,10 @@ class WwoTest extends TestCase
     protected function _getStub()
     {
         return new Horde_Service_Weather_Wwo(
-            array(
+            [
                 'apikey' => 'xxx',
-                'http_client' => $this->_getHttpClientStub()
-            )
+                'http_client' => $this->_getHttpClientStub(),
+            ]
         );
     }
 
@@ -140,16 +147,16 @@ class WwoTest extends TestCase
     {
         $this->expectException('Exception');
 
-        switch ((string)$url) {
-        case 'http://api.worldweatheronline.com/free/v1/weather.ashx?q=boston%2Cma&num_of_days=5&includeLocation=yes&extra=localObsTime&timezone=yes&format=json&key=xxx':
-            $stream = fopen(__DIR__ . '/fixtures/boston_wwo.json', 'r');
-            break;
+        switch ((string) $url) {
+            case 'http://api.worldweatheronline.com/free/v1/weather.ashx?q=boston%2Cma&num_of_days=5&includeLocation=yes&extra=localObsTime&timezone=yes&format=json&key=xxx':
+                $stream = fopen(__DIR__ . '/fixtures/boston_wwo.json', 'r');
+                break;
 
-        case 'http://api.worldweatheronline.com/free/v1/search.ashx?timezone=yes&q=42.358%2C-71.060&num_of_results=10&format=json&key=xxx':
-            $stream = fopen(__DIR__ . '/fixtures/boston_location_wwo.json', 'r');
-            break;
-        default:
-            throw new \Exception('Invalid Url');
+            case 'http://api.worldweatheronline.com/free/v1/search.ashx?timezone=yes&q=42.358%2C-71.060&num_of_results=10&format=json&key=xxx':
+                $stream = fopen(__DIR__ . '/fixtures/boston_location_wwo.json', 'r');
+                break;
+            default:
+                throw new Exception('Invalid Url');
         }
         $response = new Horde_Http_Response_Mock($url, $stream);
         $response->code = 200;

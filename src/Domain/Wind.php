@@ -25,8 +25,7 @@ final readonly class Wind
         public WindDirection $direction,
         public ?Speed $gusts = null,
         public ?float $degrees = null
-    ) {
-    }
+    ) {}
 
     /**
      * Get wind speed.
@@ -45,9 +44,12 @@ final readonly class Wind
     }
 
     /**
-     * Get wind direction in degrees (0-360).
+     * Get wind direction in degrees (0-360). Falls back to the
+     * cardinal direction's canonical angle when a precise heading
+     * was not provided at construction, so callers always get a
+     * usable numeric value.
      */
-    public function getDegrees(): ?float
+    public function getDegrees(): float
     {
         return $this->degrees ?? $this->direction->toDegrees();
     }

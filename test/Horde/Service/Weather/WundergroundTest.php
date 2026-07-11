@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Horde_Service_Weather tests
  *
@@ -10,13 +11,18 @@
  * @author     Michael J Rubinsky <mrubinsk@horde.org>
  * @license    http://www.horde.org/licenses/bsd BSD
  */
-namespace Horde\Service\Weather;
-use PHPUnit\Framework\TestCase;
-use \Horde_Http_Response_Mock;
-use \Horde_Http_Request_Mock;
-use \Horde_Service_Weather;
-use \Horde_Http_Client;
 
+namespace Horde\Service\Weather;
+
+use PHPUnit\Framework\TestCase;
+use Horde_Http_Response_Mock;
+use Horde_Http_Request_Mock;
+use Horde_Service_Weather;
+use Horde_Http_Client;
+
+/**
+ * @coversNothing
+ */
 class WundergroundTest extends TestCase
 {
     public function testCurrentConditions()
@@ -54,7 +60,7 @@ class WundergroundTest extends TestCase
         $this->assertEquals('WSW', $conditions->wind_direction);
         $this->assertEquals(237, $conditions->wind_degrees);
         $this->assertEquals(Horde_Service_Weather_Translation::t("falling"), $conditions->pressure_trend);
-        $this->assertEquals('2011-11-27 23:10:25', (string)$conditions->time);
+        $this->assertEquals('2011-11-27 23:10:25', (string) $conditions->time);
     }
 
     public function testGetStation()
@@ -63,8 +69,8 @@ class WundergroundTest extends TestCase
         $weather->getCurrentConditions('boston,ma');
         $station = $weather->getStation();
 
-        $this->assertEquals('2011-11-27 06:48:00', (string)$station->sunrise);
-        $this->assertEquals('2011-11-27 16:14:00', (string)$station->sunset);
+        $this->assertEquals('2011-11-27 06:48:00', (string) $station->sunrise);
+        $this->assertEquals('2011-11-27 16:14:00', (string) $station->sunset);
         $this->assertEquals('Boston, MA', $station->name);
     }
 
@@ -109,15 +115,15 @@ class WundergroundTest extends TestCase
 
         if (class_exists(Horde_Service_Weather_WeatherUnderground::class)) {
             return new Horde_Service_Weather_WeatherUnderground(
-                array(
+                [
                     'apikey' => 'xxx',
-                    'http_client' => new Horde_Http_Client(array('request' => $request))
-                )
+                    'http_client' => new Horde_Http_Client(['request' => $request]),
+                ]
             );
         } else {
             $this->markTestSkipped('Horde_Service_Weather_WeatherUnderground not available.');
         }
-        
+
     }
 
 }

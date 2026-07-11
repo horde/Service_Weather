@@ -22,8 +22,7 @@ final readonly class Speed
      */
     public function __construct(
         private float $metersPerSecond
-    ) {
-    }
+    ) {}
 
     /**
      * Create from meters per second.

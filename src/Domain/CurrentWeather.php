@@ -8,6 +8,7 @@ use DateTimeImmutable;
 use Horde\Service\Weather\ValueObject\Humidity;
 use Horde\Service\Weather\ValueObject\Location;
 use Horde\Service\Weather\ValueObject\Pressure;
+use Horde\Service\Weather\ValueObject\PressureTrend;
 use Horde\Service\Weather\ValueObject\Temperature;
 use Horde\Service\Weather\ValueObject\WeatherCondition;
 
@@ -36,9 +37,11 @@ final readonly class CurrentWeather
         public ?float $visibility = null,
         public ?int $cloudCover = null,
         public ?float $uvIndex = null,
-        public ?string $providerData = null
-    ) {
-    }
+        public ?string $providerData = null,
+        public ?Temperature $dewpoint = null,
+        public ?PressureTrend $pressureTrend = null,
+        public ?Station $station = null
+    ) {}
 
     /**
      * Get location.
@@ -134,5 +137,32 @@ final readonly class CurrentWeather
     public function getProviderData(): ?string
     {
         return $this->providerData;
+    }
+
+    /**
+     * Get dewpoint temperature.
+     */
+    public function getDewpoint(): ?Temperature
+    {
+        return $this->dewpoint;
+    }
+
+    /**
+     * Get 3-hour barometric pressure trend.
+     */
+    public function getPressureTrend(): ?PressureTrend
+    {
+        return $this->pressureTrend;
+    }
+
+    /**
+     * Get the observation station, when the observation is station-anchored.
+     *
+     * Populated by station-based providers (NWS, METAR). Grid- or point-based
+     * providers (OpenMeteo, OpenWeatherMap, WeatherAPI) leave this null.
+     */
+    public function getStation(): ?Station
+    {
+        return $this->station;
     }
 }
