@@ -1,9 +1,10 @@
 <?php
+
 /**
  * This file contains the Horde_Service_Weather_Base class for abstracting
  * access to various weather providers.
  *
- * Copyright 2011-2017 Horde LLC (http://www.horde.org/)
+ * Copyright 2011-2026 Horde LLC (http://www.horde.org/)
  *
  * @author   Michael J Rubinsky <mrubinsk@horde.org>
  * @license  http://www.horde.org/licenses/bsd BSD
@@ -76,7 +77,7 @@ abstract class Horde_Service_Weather_Base
      *
      * @var array
      */
-    public $iconMap = array();
+    public $iconMap = [];
 
     /**
      * The http client
@@ -119,7 +120,7 @@ abstract class Horde_Service_Weather_Base
      */
     protected $_lastLength;
 
-    protected $_alerts = array();
+    protected $_alerts = [];
 
     protected $_radar;
 
@@ -131,7 +132,7 @@ abstract class Horde_Service_Weather_Base
      *     - cache_lifetime: (integer)        Lifetime of cached data, if caching.
      *     - http_client: (Horde_Http_Client) Required http client object.
      */
-    public function __construct(array $params = array())
+    public function __construct(array $params = [])
     {
         if (empty($params['http_client'])) {
             throw new InvalidArgumentException('Missing http_client parameter.');
@@ -173,7 +174,8 @@ abstract class Horde_Service_Weather_Base
     abstract public function getForecast(
         $location,
         $length = Horde_Service_Weather::FORECAST_3DAY,
-        $type = Horde_Service_Weather::FORECAST_TYPE_STANDARD);
+        $type = Horde_Service_Weather::FORECAST_TYPE_STANDARD
+    );
 
     /**
      * Searches locations.
@@ -188,49 +190,50 @@ abstract class Horde_Service_Weather_Base
      */
     abstract public function searchLocations(
         $location,
-        $type = Horde_Service_Weather::SEARCHTYPE_STANDARD);
+        $type = Horde_Service_Weather::SEARCHTYPE_STANDARD
+    );
 
     /**
      * Get array of supported forecast lengths.
      *
      * @return array The array of supported lengths.
      */
-     abstract public function getSupportedForecastLengths();
+    abstract public function getSupportedForecastLengths();
 
-     /**
-      * Return array of weather alerts, if available.
-      *
-      * @return array
-      */
-     public function getAlerts($location)
-     {
+    /**
+     * Return array of weather alerts, if available.
+     *
+     * @return array
+     */
+    public function getAlerts($location)
+    {
         return $this->_alerts;
-     }
+    }
 
-     /**
-      * Return the URL to a (possibly animated) radar image.
-      *
-      * @param  string $location  The location
-      *
-      * @return string|boolean The Url, or false if not available.
-      */
-     public function getRadarImageUrl($location)
-     {
+    /**
+     * Return the URL to a (possibly animated) radar image.
+     *
+     * @param  string $location  The location
+     *
+     * @return string|boolean The Url, or false if not available.
+     */
+    public function getRadarImageUrl($location)
+    {
         return false;
-     }
+    }
 
-     /**
-      * Return the URL a OpenLayers suitable tile server.
-      *
-      * @param string $location  The location.
-      * @param string $type      The optional layer type.
-      *
-      * @return string|boolean The Url, or false if not available.
-      */
-     public function getTileServerUrl($location, $type = null)
-     {
+    /**
+     * Return the URL a OpenLayers suitable tile server.
+     *
+     * @param string $location  The location.
+     * @param string $type      The optional layer type.
+     *
+     * @return string|boolean The Url, or false if not available.
+     */
+    public function getTileServerUrl($location, $type = null)
+    {
         return false;
-     }
+    }
 
     /**
      * Searches for locations that begin with the text in $search.
@@ -261,27 +264,27 @@ abstract class Horde_Service_Weather_Base
         }
 
         if ($type == Horde_Service_Weather::UNITS_STANDARD) {
-            return array(
+            return [
                 'temp' => Horde_Service_Weather_Translation::t('F'),
                 'wind' => Horde_Service_Weather_Translation::t('mph'),
                 'pres' => Horde_Service_Weather_Translation::t('inches'),
                 'vis' => Horde_Service_Weather_Translation::t('miles'),
                 'rain' => Horde_Service_Weather_Translation::t('inches'),
                 'snow' => Horde_Service_Weather_Translation::t('inches'),
-                'height' => Horde_Service_Weather_Translation::t('feet')
+                'height' => Horde_Service_Weather_Translation::t('feet'),
 
-            );
+            ];
         }
 
-        return array(
+        return [
             'temp' => Horde_Service_Weather_Translation::t('C'),
             'wind' => Horde_Service_Weather_Translation::t('kph'),
             'pres' => Horde_Service_Weather_Translation::t('millibars'),
             'vis' => Horde_Service_Weather_Translation::t('km'),
             'rain' => Horde_Service_Weather_Translation::t('millimeters'),
             'snow' => Horde_Service_Weather_Translation::t('centimeters'),
-            'height' => Horde_Service_Weather_Translation::t('meters')
-        );
+            'height' => Horde_Service_Weather_Translation::t('meters'),
+        ];
     }
 
     /**
@@ -323,9 +326,9 @@ abstract class Horde_Service_Weather_Base
         }
 
         // reserved RFC 1918
-        if ($parts[0] == 10 ||
-            ($parts[0] == 192 && $parts[1] == 168) ||
-            ($parts[0] == 172 && ($parts[1] >= 16 && $parts[1] <= 31))) {
+        if ($parts[0] == 10
+            || ($parts[0] == 192 && $parts[1] == 168)
+            || ($parts[0] == 172 && ($parts[1] >= 16 && $parts[1] <= 31))) {
 
             return false;
         }

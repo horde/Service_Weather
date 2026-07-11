@@ -1,6 +1,7 @@
 <?php
+
 /**
- * Copyright 2016-2017 Horde LLC (http://www.horde.org/)
+ * Copyright 2016-2026 Horde LLC (http://www.horde.org/)
  *
  * @author   Michael J Rubinsky <mrubinsk@horde.org>
  * @license  http://www.horde.org/licenses/bsd BSD
@@ -27,11 +28,11 @@
  */
 abstract class Horde_Service_Weather_Parser_Base
 {
-    const UNIT_KEY_TEMP = 'temp';
-    const UNIT_KEY_SPEED = 'speed';
-    const UNIT_KEY_PRESSURE = 'pressure';
-    const UNIT_KEY_DISTANCE = 'distance';
-    const UNIT_KEY_HEIGHT = 'height';
+    public const UNIT_KEY_TEMP = 'temp';
+    public const UNIT_KEY_SPEED = 'speed';
+    public const UNIT_KEY_PRESSURE = 'pressure';
+    public const UNIT_KEY_DISTANCE = 'distance';
+    public const UNIT_KEY_HEIGHT = 'height';
 
     /**
      * The type of units to convert to.
@@ -53,28 +54,28 @@ abstract class Horde_Service_Weather_Parser_Base
      *
      * @var array
      */
-    protected $_clouds = array();
+    protected $_clouds = [];
 
     /**
      * CloudType map
      *
      * @var array
      */
-    protected $_cloudTypes =  array();
+    protected $_cloudTypes =  [];
 
     /**
      * Conditions map
      *
      * @var array
      */
-    protected $_conditions = array();
+    protected $_conditions = [];
 
     /**
      * Sensors map
      *
      * @var array
      */
-    protected $_sensors = array();
+    protected $_sensors = [];
 
     /**
      * constructor
@@ -82,18 +83,18 @@ abstract class Horde_Service_Weather_Parser_Base
      * @param array $params  Parameter array:
      *   - units: (integer) The Horde_Service_Weather::UNITS_* constant.
      */
-    public function __construct(array $params = array())
+    public function __construct(array $params = [])
     {
         $this->_units = $params['units'];
-        $this->_unitMap = array(
+        $this->_unitMap = [
             self::UNIT_KEY_TEMP => $this->_units == Horde_Service_Weather::UNITS_METRIC ? 'c' : 'f',
             self::UNIT_KEY_SPEED => $this->_units == Horde_Service_Weather::UNITS_METRIC ? 'kph' : 'mph',
             self::UNIT_KEY_PRESSURE => $this->_units == Horde_Service_Weather::UNITS_METRIC ? 'mb' : 'in',
             self::UNIT_KEY_DISTANCE => $this->_units == Horde_Service_Weather::UNITS_METRIC ? 'km' : 'sm',
-            self::UNIT_KEY_HEIGHT => $this->_units == Horde_Service_Weather::UNITS_METRIC ? 'm' : 'ft'
-        );
+            self::UNIT_KEY_HEIGHT => $this->_units == Horde_Service_Weather::UNITS_METRIC ? 'm' : 'ft',
+        ];
 
-        $this->_conditions = array(
+        $this->_conditions = [
             '+'   => Horde_Service_Weather_Translation::t('heavy'),
             '-'   => Horde_Service_Weather_Translation::t('light'),
             'vc'  => Horde_Service_Weather_Translation::t('vicinity'),
@@ -130,9 +131,9 @@ abstract class Horde_Service_Weather_Parser_Base
             'ds'  => Horde_Service_Weather_Translation::t('duststorm'),
             'po'  => Horde_Service_Weather_Translation::t('well developed dust/sand whirls'),
             'fc'  => Horde_Service_Weather_Translation::t('funnel cloud'),
-            '+fc' => Horde_Service_Weather_Translation::t('tornado/waterspout')
-        );
-        $this->_clouds = array(
+            '+fc' => Horde_Service_Weather_Translation::t('tornado/waterspout'),
+        ];
+        $this->_clouds = [
             'skc' => Horde_Service_Weather_Translation::t('sky clear'),
             'nsc' => Horde_Service_Weather_Translation::t('no significant cloud'),
             'few' => Horde_Service_Weather_Translation::t('few'),
@@ -142,10 +143,10 @@ abstract class Horde_Service_Weather_Parser_Base
             'vv'  => Horde_Service_Weather_Translation::t('vertical visibility'),
             'tcu' => Horde_Service_Weather_Translation::t('Towering Cumulus'),
             'cb'  => Horde_Service_Weather_Translation::t('Cumulonimbus'),
-            'clr' => Horde_Service_Weather_Translation::t('clear below 12,000 ft')
-        );
-        $this->_cloudTypes =  array(
-            'low' => array(
+            'clr' => Horde_Service_Weather_Translation::t('clear below 12,000 ft'),
+        ];
+        $this->_cloudTypes =  [
+            'low' => [
                 '/' => Horde_Service_Weather_Translation::t('Overcast'),
                 '0' => Horde_Service_Weather_Translation::t('None'),
                 '1' => Horde_Service_Weather_Translation::t('Cumulus (fair weather)'),
@@ -156,9 +157,9 @@ abstract class Horde_Service_Weather_Parser_Base
                 '6' => Horde_Service_Weather_Translation::t('Stratus or Fractostratus (fair)'),
                 '7' => Horde_Service_Weather_Translation::t('Fractocumulus/Fractostratus (bad weather)'),
                 '8' => Horde_Service_Weather_Translation::t('Cumulus and Stratocumulus'),
-                '9' => Horde_Service_Weather_Translation::t('Cumulonimbus (thunderstorm)')
-            ),
-            'middle' => array(
+                '9' => Horde_Service_Weather_Translation::t('Cumulonimbus (thunderstorm)'),
+            ],
+            'middle' => [
                 '/' => Horde_Service_Weather_Translation::t('Overcast'),
                 '0' => Horde_Service_Weather_Translation::t('None'),
                 '1' => Horde_Service_Weather_Translation::t('Altostratus (thin)'),
@@ -169,9 +170,9 @@ abstract class Horde_Service_Weather_Parser_Base
                 '6' => Horde_Service_Weather_Translation::t('Altocumulus (from Cumulus)'),
                 '7' => Horde_Service_Weather_Translation::t('Altocumulus (w/ Altocumulus, Altostratus, Nimbostratus)'),
                 '8' => Horde_Service_Weather_Translation::t('Altocumulus (w/ turrets)'),
-                '9' => Horde_Service_Weather_Translation::t('Altocumulus (chaotic)')
-            ),
-            'high' => array(
+                '9' => Horde_Service_Weather_Translation::t('Altocumulus (chaotic)'),
+            ],
+            'high' => [
                 '/' => Horde_Service_Weather_Translation::t('Overcast'),
                 '0' => Horde_Service_Weather_Translation::t('None'),
                 '1' => Horde_Service_Weather_Translation::t('Cirrus (filaments)'),
@@ -182,19 +183,19 @@ abstract class Horde_Service_Weather_Parser_Base
                 '6' => Horde_Service_Weather_Translation::t('Cirrus/Cirrostratus (high in sky)'),
                 '7' => Horde_Service_Weather_Translation::t('Cirrostratus (entire sky)'),
                 '8' => Horde_Service_Weather_Translation::t('Cirrostratus (partial)'),
-                '9' => Horde_Service_Weather_Translation::t('Cirrocumulus or Cirrocumulus/Cirrus/Cirrostratus')
-            )
-        );
+                '9' => Horde_Service_Weather_Translation::t('Cirrocumulus or Cirrocumulus/Cirrus/Cirrostratus'),
+            ],
+        ];
 
-        $this->_sensors = array(
+        $this->_sensors = [
             'rvrno'  => Horde_Service_Weather_Translation::t('Runway Visual Range Detector offline'),
             'pwino'  => Horde_Service_Weather_Translation::t('Present Weather Identifier offline'),
             'pno'    => Horde_Service_Weather_Translation::t('Tipping Bucket Rain Gauge offline'),
             'fzrano' => Horde_Service_Weather_Translation::t('Freezing Rain Sensor offline'),
             'tsno'   => Horde_Service_Weather_Translation::t('Lightning Detection System offline'),
             'visno'  => Horde_Service_Weather_Translation::t('2nd Visibility Sensor offline'),
-            'chino'  => Horde_Service_Weather_Translation::t('2nd Ceiling Height Indicator offline')
-        );
+            'chino'  => Horde_Service_Weather_Translation::t('2nd Ceiling Height Indicator offline'),
+        ];
     }
 
     /**

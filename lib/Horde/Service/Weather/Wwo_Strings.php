@@ -1,4 +1,5 @@
 <?php
+
 /**
  * List of strings needed to translate for Wwo. Never loaded, so
  * use of _ shortcut here is fine.

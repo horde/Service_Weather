@@ -1,9 +1,10 @@
 <?php
+
 /**
  * This file contains the Horde_Service_Weather_Period_Base class for
  * abstracting access to a single forecast period.
  *
- * Copyright 2011-2017 Horde LLC (http://www.horde.org/)
+ * Copyright 2011-2026 Horde LLC (http://www.horde.org/)
  *
  * @author   Michael J Rubinsky <mrubinsk@horde.org>
  * @license  http://www.horde.org/licenses/bsd BSD
@@ -84,4 +85,4 @@ class Horde_Service_Weather_Period_Base
         throw new Horde_Service_Weather_Exception_InvalidProperty('This provider does not support that property');
     }
 
- }
+}

@@ -1,6 +1,7 @@
 <?php
+
 /**
- * Copyright 2016-2017 Horde LLC (http://www.horde.org/)
+ * Copyright 2016-2026 Horde LLC (http://www.horde.org/)
  *
  * @author   Michael J Rubinsky <mrubinsk@horde.org>
  * @license  http://www.horde.org/licenses/bsd BSD
@@ -61,7 +62,7 @@ class Horde_Service_Weather_Parser_Taf extends Horde_Service_Weather_Parser_Base
         }
 
         // Ok, we have correct data, start with parsing the first line for the last update
-        $forecastData = array();
+        $forecastData = [];
         $forecastData['station'] = '';
         $forecastData['dataRaw'] = implode(' ', $data);
         $forecastData['update'] = strtotime(trim($data[0]) . ' GMT');
@@ -86,362 +87,363 @@ class Horde_Service_Weather_Parser_Taf extends Horde_Service_Weather_Parser_Base
             }
 
             // Init
-            $result   = array();
-            $resultVF = array();
-            $lresult  = array();
+            $result   = [];
+            $resultVF = [];
+            $lresult  = [];
             $found = false;
 
             foreach ($tafCode as $key => $regexp) {
                 // Check if current code matches current taf snippet
                 if (($found = preg_match('/^' . $regexp . '$/i', $taf[$i], $result)) == true) {
-                    $insert = array();
+                    $insert = [];
                     switch ($key) {
-                    case 'station':
-                        $pointer['station'] = $result[0];
-                        unset($tafCode['station']);
-                        break;
-                    case 'valid':
-                        $pointer['validRaw'] = $result[0];
-                        // Generates the timeperiod the report is valid for
-                        list($year, $month, $day) = explode('-', gmdate('Y-m-d', $forecastData['update']));
-                        // Date is in next month
-                        if ($result[1] < $day) {
-                            $month++;
-                        }
-                        $pointer['validFrom'] = new Horde_Date(array(
-                            'hour' => $result[2],
-                            'month' => $month,
-                            'mday' => $result[1],
-                            'year' => $year), 'GMT');
-                        $pointer['validTo'] = new Horde_Date(array(
-                            'hour' => $result[4],
-                            'month' => $month,
-                            'mday' => $result[3],
-                            'year' => $year), 'GMT');
-                        unset($tafCode['valid']);
-                        // Now the groups will start, so initialize the time groups
-                        $pointer['time'] = array();
-                        $start_time = new Horde_Date(array(
-                            'year' => $year,
-                            'month' => $month,
-                            'mday' => $result[1],
-                            'hour' => $result[2]), 'UTC');
-                        $fromTime = (string)$start_time;
-                        $pointer['time'][$fromTime] = array();
-                        // Set pointer to the first timeperiod
-                        $pointer = &$pointer['time'][$fromTime];
-                        break;
-                    case 'wind':
-                        if ($result[5] == 'KTS') {
-                            $result[5] = 'KT';
-                        }
-                        $pointer['wind'] = round(Horde_Service_Weather::convertSpeed(
-                            $result[2],
-                            $result[5],
-                            $this->_unitMap[self::UNIT_KEY_SPEED]
-                        ));
-                        if ($result[1] == 'VAR' || $result[1] == 'VRB') {
-                            $pointer['windDegrees'] = Horde_Service_Weather_Translation::t('Variable');
-                            $pointer['windDirection'] = Horde_Service_Weather_Translation::t('Variable');
-                        } else {
-                            $pointer['windDegrees'] = $result[1];
-                            $pointer['windDirection'] = Horde_Service_Weather::degToDirection($result[1]);
-                        }
-                        if (is_numeric($result[4])) {
-                            $pointer['windGust'] = round(Horde_Service_Weather::convertSpeed(
-                                $result[4],
+                        case 'station':
+                            $pointer['station'] = $result[0];
+                            unset($tafCode['station']);
+                            break;
+                        case 'valid':
+                            $pointer['validRaw'] = $result[0];
+                            // Generates the timeperiod the report is valid for
+                            [$year, $month, $day] = explode('-', gmdate('Y-m-d', $forecastData['update']));
+                            // Date is in next month
+                            if ($result[1] < $day) {
+                                $month++;
+                            }
+                            $pointer['validFrom'] = new Horde_Date([
+                                'hour' => $result[2],
+                                'month' => $month,
+                                'mday' => $result[1],
+                                'year' => $year], 'GMT');
+                            $pointer['validTo'] = new Horde_Date([
+                                'hour' => $result[4],
+                                'month' => $month,
+                                'mday' => $result[3],
+                                'year' => $year], 'GMT');
+                            unset($tafCode['valid']);
+                            // Now the groups will start, so initialize the time groups
+                            $pointer['time'] = [];
+                            $start_time = new Horde_Date([
+                                'year' => $year,
+                                'month' => $month,
+                                'mday' => $result[1],
+                                'hour' => $result[2]], 'UTC');
+                            $fromTime = (string) $start_time;
+                            $pointer['time'][$fromTime] = [];
+                            // Set pointer to the first timeperiod
+                            $pointer = &$pointer['time'][$fromTime];
+                            break;
+                        case 'wind':
+                            if ($result[5] == 'KTS') {
+                                $result[5] = 'KT';
+                            }
+                            $pointer['wind'] = round(Horde_Service_Weather::convertSpeed(
+                                $result[2],
                                 $result[5],
                                 $this->_unitMap[self::UNIT_KEY_SPEED]
                             ));
-                        }
-                        if (isset($probability)) {
-                            $pointer['windProb'] = $probability;
-                            unset($probability);
-                        }
-                        unset($tafCode['wind']);
-                        break;
-                    case 'visFrac':
-                        // Possible fractional visibility here.
-                        // Check if it matches with the next TAF piece for visibility
-                        if (!isset($taf[$i + 1]) ||
-                            !preg_match('/^' . $tafCode['visibility'] . '$/i', $result[1] . ' ' . $taf[$i + 1], $resultVF)) {
-                            // No next TAF piece available or not matching.
-                            $found = false;
-                            break;
-                        }
-                        // Match. Hand over result and advance TAF
-                        $key = 'visibility';
-                        $result = $resultVF;
-                        $i++;
-
-                        // Fall through
-                    case 'visibility':
-                        $pointer['visQualifier'] = Horde_Service_Weather_Translation::t('AT');
-                        if (is_numeric($result[1]) && ($result[1] == 9999)) {
-                            // Upper limit of visibility range
-                            $visibility = Horde_Service_Weather::convertDistance(
-                                10,
-                                'km',
-                                $this->_unitMap[self::UNIT_KEY_DISTANCE]
-                            );
-                            $pointer['visQualifier'] = Horde_Service_Weather_Translation::t('BEYOND');
-                        } elseif (is_numeric($result[1])) {
-                            // 4-digit visibility in m
-                            $visibility = Horde_Service_Weather::convertDistance(
-                                $result[1],
-                                'm',
-                                $this->_unitMap[self::UNIT_KEY_DISTANCE]
-                            );
-                        } elseif (!isset($result[11]) || $result[11] != 'CAVOK') {
-                            if ($result[3] == 'M') {
-                                $pointer['visQualifier'] = Horde_Service_Weather_Translation::t('BELOW');
-                            } elseif ($result[3] == 'P') {
-                                $pointer['visQualifier'] = Horde_Service_Weather_Translation::t('BEYOND');
+                            if ($result[1] == 'VAR' || $result[1] == 'VRB') {
+                                $pointer['windDegrees'] = Horde_Service_Weather_Translation::t('Variable');
+                                $pointer['windDirection'] = Horde_Service_Weather_Translation::t('Variable');
+                            } else {
+                                $pointer['windDegrees'] = $result[1];
+                                $pointer['windDirection'] = Horde_Service_Weather::degToDirection($result[1]);
                             }
-                            if (is_numeric($result[5])) {
-                                // visibility as one/two-digit number
-                                $visibility = Horde_Service_Weather::convertDistance(
+                            if (is_numeric($result[4])) {
+                                $pointer['windGust'] = round(Horde_Service_Weather::convertSpeed(
+                                    $result[4],
                                     $result[5],
-                                    $result[10],
+                                    $this->_unitMap[self::UNIT_KEY_SPEED]
+                                ));
+                            }
+                            if (isset($probability)) {
+                                $pointer['windProb'] = $probability;
+                                unset($probability);
+                            }
+                            unset($tafCode['wind']);
+                            break;
+                        case 'visFrac':
+                            // Possible fractional visibility here.
+                            // Check if it matches with the next TAF piece for visibility
+                            if (!isset($taf[$i + 1])
+                                || !preg_match('/^' . $tafCode['visibility'] . '$/i', $result[1] . ' ' . $taf[$i + 1], $resultVF)) {
+                                // No next TAF piece available or not matching.
+                                $found = false;
+                                break;
+                            }
+                            // Match. Hand over result and advance TAF
+                            $key = 'visibility';
+                            $result = $resultVF;
+                            $i++;
+
+                            // Fall through
+                            // no break
+                        case 'visibility':
+                            $pointer['visQualifier'] = Horde_Service_Weather_Translation::t('AT');
+                            if (is_numeric($result[1]) && ($result[1] == 9999)) {
+                                // Upper limit of visibility range
+                                $visibility = Horde_Service_Weather::convertDistance(
+                                    10,
+                                    'km',
                                     $this->_unitMap[self::UNIT_KEY_DISTANCE]
                                 );
-                            } else {
-                                // the y/z part, add if we had a x part (see visibility1)
-                                if (is_numeric($result[7])) {
+                                $pointer['visQualifier'] = Horde_Service_Weather_Translation::t('BEYOND');
+                            } elseif (is_numeric($result[1])) {
+                                // 4-digit visibility in m
+                                $visibility = Horde_Service_Weather::convertDistance(
+                                    $result[1],
+                                    'm',
+                                    $this->_unitMap[self::UNIT_KEY_DISTANCE]
+                                );
+                            } elseif (!isset($result[11]) || $result[11] != 'CAVOK') {
+                                if ($result[3] == 'M') {
+                                    $pointer['visQualifier'] = Horde_Service_Weather_Translation::t('BELOW');
+                                } elseif ($result[3] == 'P') {
+                                    $pointer['visQualifier'] = Horde_Service_Weather_Translation::t('BEYOND');
+                                }
+                                if (is_numeric($result[5])) {
+                                    // visibility as one/two-digit number
                                     $visibility = Horde_Service_Weather::convertDistance(
-                                        $result[7] + $result[8] / $result[9],
+                                        $result[5],
                                         $result[10],
                                         $this->_unitMap[self::UNIT_KEY_DISTANCE]
                                     );
                                 } else {
-                                    $visibility = Horde_Service_Weather::convertDistance(
-                                        $result[8] / $result[9],
-                                        $result[10],
-                                        $this->_unitMap[self::UNIT_KEY_DISTANCE]
-                                    );
+                                    // the y/z part, add if we had a x part (see visibility1)
+                                    if (is_numeric($result[7])) {
+                                        $visibility = Horde_Service_Weather::convertDistance(
+                                            $result[7] + $result[8] / $result[9],
+                                            $result[10],
+                                            $this->_unitMap[self::UNIT_KEY_DISTANCE]
+                                        );
+                                    } else {
+                                        $visibility = Horde_Service_Weather::convertDistance(
+                                            $result[8] / $result[9],
+                                            $result[10],
+                                            $this->_unitMap[self::UNIT_KEY_DISTANCE]
+                                        );
+                                    }
+                                }
+                            } else {
+                                $pointer['visQualifier'] = Horde_Service_Weather_Translation::t('BEYOND');
+                                $visibility = Horde_Service_Weather::convertDistance(
+                                    10,
+                                    'km',
+                                    $this->_unitMap[self::UNIT_KEY_DISTANCE]
+                                );
+                                $pointer['clouds'] = [[
+                                    'amount' => Horde_Service_Weather_Translation::t('Clear below'),
+                                    'height' => 5000],
+                                ];
+                                $pointer['condition'] = Horde_Service_Weather_Translation::t('No significant weather');
+                            }
+                            if (isset($probability)) {
+                                $pointer['visProb'] = $probability;
+                                unset($probability);
+                            }
+                            $pointer['visibility'] = $visibility;
+                            break;
+                        case 'condition':
+                            // First some basic setups
+                            if (!isset($pointer['condition'])) {
+                                $pointer['condition'] = '';
+                            } elseif (strlen($pointer['condition']) > 0) {
+                                $pointer['condition'] .= ',';
+                            }
+
+                            if (in_array(strtolower($result[0]), $this->_conditions)) {
+                                // First try matching the complete string
+                                $pointer['condition'] .= ' ' . $this->_conditions[strtolower($result[0])];
+                            } else {
+                                // No luck, match part by part
+                                array_shift($result);
+                                $result = array_unique($result);
+                                foreach ($result as $condition) {
+                                    if (strlen($condition) > 0) {
+                                        $pointer['condition'] .= ' ' . $this->_conditions[strtolower($condition)];
+                                    }
                                 }
                             }
-                        } else {
-                            $pointer['visQualifier'] = Horde_Service_Weather_Translation::t('BEYOND');
-                            $visibility = Horde_Service_Weather::convertDistance(
-                                10,
-                                'km',
-                                $this->_unitMap[self::UNIT_KEY_DISTANCE]
-                            );
-                            $pointer['clouds'] = array(array(
-                                'amount' => Horde_Service_Weather_Translation::t('Clear below'),
-                                'height' => 5000)
-                            );
-                            $pointer['condition'] = Horde_Service_Weather_Translation::t('No significant weather');
-                        }
-                        if (isset($probability)) {
-                            $pointer['visProb'] = $probability;
-                            unset($probability);
-                        }
-                        $pointer['visibility'] = $visibility;
-                        break;
-                    case 'condition':
-                        // First some basic setups
-                        if (!isset($pointer['condition'])) {
-                            $pointer['condition'] = '';
-                        } elseif (strlen($pointer['condition']) > 0) {
-                            $pointer['condition'] .= ',';
-                        }
+                            $pointer['condition'] = trim($pointer['condition']);
+                            if (isset($probability)) {
+                                $pointer['condition'] .= ' (' . $probability
+                                    . '% '
+                                    . Horde_Service_Weather_Translation::t('probability')
+                                    . ').';
+                                unset($probability);
+                            }
+                            break;
+                        case 'clouds':
+                            if (!isset($pointer['clouds'])) {
+                                $pointer['clouds'] = [];
+                            }
 
-                        if (in_array(strtolower($result[0]), $this->_conditions)) {
-                            // First try matching the complete string
-                            $pointer['condition'] .= ' ' . $this->_conditions[strtolower($result[0])];
-                        } else {
-                            // No luck, match part by part
-                            array_shift($result);
-                            $result = array_unique($result);
-                            foreach ($result as $condition) {
-                                if (strlen($condition) > 0) {
-                                    $pointer['condition'] .= ' ' . $this->_conditions[strtolower($condition)];
+                            if (sizeof($result) == 5) {
+                                // Only amount and height
+                                $cloud = ['amount' => $this->_clouds[strtolower($result[3])]];
+                                if ($result[4] == '///') {
+                                    $cloud['height'] = Horde_Service_Weather_Translation::t('station level or below');
+                                } else {
+                                    $cloud['height'] = $result[4] * 100;
                                 }
-                            }
-                        }
-                        $pointer['condition'] = trim($pointer['condition']);
-                        if (isset($probability)) {
-                            $pointer['condition'] .= ' (' . $probability
-                                . '% '
-                                . Horde_Service_Weather_Translation::t('probability')
-                                . ').';
-                            unset($probability);
-                        }
-                        break;
-                    case 'clouds':
-                        if (!isset($pointer['clouds'])) {
-                            $pointer['clouds'] = array();
-                        }
-
-                        if (sizeof($result) == 5) {
-                            // Only amount and height
-                            $cloud = array('amount' => $this->_clouds[strtolower($result[3])]);
-                            if ($result[4] == '///') {
-                                $cloud['height'] = Horde_Service_Weather_Translation::t('station level or below');
+                            } elseif (sizeof($result) == 6) {
+                                // Amount, height and type
+                                $cloud = [
+                                    'amount' => $this->_clouds[strtolower($result[3])],
+                                    'type' => $this->_clouds[strtolower($result[5])],
+                                ];
+                                if ($result[4] == '///') {
+                                    $cloud['height'] = Horde_Service_Weather_Translation::t('station level or below');
+                                } else {
+                                    $cloud['height'] = $result[4] * 100;
+                                }
                             } else {
-                                $cloud['height'] = $result[4] * 100;
+                                // SKC or CLR or NSC
+                                $cloud = ['amount' => $this->_clouds[strtolower($result[0])]];
                             }
-                        } elseif (sizeof($result) == 6) {
-                            // Amount, height and type
-                            $cloud = array(
-                                'amount' => $this->_clouds[strtolower($result[3])],
-                                'type' => $this->_clouds[strtolower($result[5])]
+                            if (isset($probability)) {
+                                $cloud['prob'] = $probability;
+                                unset($probability);
+                            }
+                            $pointer['clouds'][] = $cloud;
+                            break;
+                        case 'windshear':
+                            // Parse windshear, if available
+                            if ($result[4] == 'KTS') {
+                                $result[4] = 'KT';
+                            }
+                            $pointer['windshear'] = round(Horde_Service_Weather::convertSpeed(
+                                $result[3],
+                                $result[4],
+                                $this->_unitMap[self::UNIT_KEY_SPEED]
+                            ));
+                            $pointer['windshearHeight'] = $result[1] * 100;
+                            $pointer['windshearDegrees'] = $result[2];
+                            $pointer['windshearDirection'] = Horde_Service_Weather::degToDirection($result[2]);
+                            break;
+                        case 'tempmax':
+                            $forecastData['temperatureHigh'] = Horde_Service_Weather::convertTemperature(
+                                $result[1],
+                                'c',
+                                $this->_unitMap[self::UNIT_KEY_TEMP]
                             );
-                            if ($result[4] == '///') {
-                                $cloud['height'] = Horde_Service_Weather_Translation::t('station level or below');
+                            break;
+                        case 'tempmin':
+                            // Parse max/min temperature
+                            $forecastData['temperatureLow'] = Horde_Service_Weather::convertTemperature(
+                                $result[1],
+                                'c',
+                                $this->_unitMap[self::UNIT_KEY_TEMP]
+                            );
+                            break;
+                        case 'tempmaxmin':
+                            $forecastData['temperatureHigh'] = Horde_Service_Weather::convertTemperature(
+                                $result[1],
+                                'c',
+                                $this->_unitMap[self::UNIT_KEY_TEMP]
+                            );
+                            $forecastData['temperatureLow'] = Horde_Service_Weather::convertTemperature(
+                                $result[4],
+                                'c',
+                                $this->_unitMap[self::UNIT_KEY_TEMP]
+                            );
+                            break;
+                        case 'from':
+                            // Next timeperiod is coming up, prepare array and
+                            // set pointer accordingly
+                            $fromTime = clone $start_time;
+                            if (sizeof($result) > 2) {
+                                // The ICAO way
+                                $fromTime->hour = $result[2];
+                                $fromTime->min = $result[3];
                             } else {
-                                $cloud['height'] = $result[4] * 100;
+                                // The Australian way (Hey mates!)
+                                $fromTime->hour = $result[1];
                             }
-                        } else {
-                            // SKC or CLR or NSC
-                            $cloud = array('amount' => $this->_clouds[strtolower($result[0])]);
-                        }
-                        if (isset($probability)) {
-                            $cloud['prob'] = $probability;
-                            unset($probability);
-                        }
-                        $pointer['clouds'][] = $cloud;
-                        break;
-                    case 'windshear':
-                        // Parse windshear, if available
-                        if ($result[4] == 'KTS') {
-                            $result[4] = 'KT';
-                        }
-                        $pointer['windshear'] = round(Horde_Service_Weather::convertSpeed(
-                            $result[3],
-                            $result[4],
-                            $this->_unitMap[self::UNIT_KEY_SPEED]
-                        ));
-                        $pointer['windshearHeight'] = $result[1] * 100;
-                        $pointer['windshearDegrees'] = $result[2];
-                        $pointer['windshearDirection'] = Horde_Service_Weather::degToDirection($result[2]);
-                        break;
-                    case 'tempmax':
-                        $forecastData['temperatureHigh'] = Horde_Service_Weather::convertTemperature(
-                            $result[1],
-                            'c',
-                            $this->_unitMap[self::UNIT_KEY_TEMP]
-                        );
-                        break;
-                    case 'tempmin':
-                        // Parse max/min temperature
-                        $forecastData['temperatureLow'] = Horde_Service_Weather::convertTemperature(
-                            $result[1],
-                            'c',
-                            $this->_unitMap[self::UNIT_KEY_TEMP]
-                        );
-                        break;
-                    case 'tempmaxmin':
-                        $forecastData['temperatureHigh'] = Horde_Service_Weather::convertTemperature(
-                            $result[1],
-                            'c',
-                            $this->_unitMap[self::UNIT_KEY_TEMP]
-                        );
-                        $forecastData['temperatureLow'] = Horde_Service_Weather::convertTemperature(
-                            $result[4],
-                            'c',
-                            $this->_unitMap[self::UNIT_KEY_TEMP]
-                        );
-                        break;
-                    case 'from':
-                        // Next timeperiod is coming up, prepare array and
-                        // set pointer accordingly
-                        $fromTime = clone $start_time;
-                        if (sizeof($result) > 2) {
-                            // The ICAO way
-                            $fromTime->hour = $result[2];
-                            $fromTime->min = $result[3];
-                        } else {
-                            // The Australian way (Hey mates!)
-                            $fromTime->hour = $result[1];
-                        }
-                        if ($start_time->compareDateTime($fromTime) >= 1) {
-                            $fromTime->mday++;
-                        }
-                        $fromTime = (string)$fromTime;
-                        $forecastData['time'][$fromTime] = array();
-                        $fmcCount = 0;
-                        $pointer = &$forecastData['time'][$fromTime];
-                        break;
-                    case 'fmc';
-                        // Test, if this is a probability for the next FMC
-                        if (isset($result[2]) && preg_match('/^BECMG|TEMPO$/i', $taf[$i + 1], $lresult)) {
-                            // Set type to BECMG or TEMPO
-                            $type = $lresult[0];
-                            // Set probability
-                            $probability = $result[2];
-                            // Now extract time for this group
-                            if (preg_match('/^(\d{2})(\d{2})$/i', $taf[$i + 2], $lresult)) {
+                            if ($start_time->compareDateTime($fromTime) >= 1) {
+                                $fromTime->mday++;
+                            }
+                            $fromTime = (string) $fromTime;
+                            $forecastData['time'][$fromTime] = [];
+                            $fmcCount = 0;
+                            $pointer = &$forecastData['time'][$fromTime];
+                            break;
+                        case 'fmc':
+                            // Test, if this is a probability for the next FMC
+                            if (isset($result[2]) && preg_match('/^BECMG|TEMPO$/i', $taf[$i + 1], $lresult)) {
+                                // Set type to BECMG or TEMPO
+                                $type = $lresult[0];
+                                // Set probability
+                                $probability = $result[2];
+                                // Now extract time for this group
+                                if (preg_match('/^(\d{2})(\d{2})$/i', $taf[$i + 2], $lresult)) {
+                                    $from = clone($start_time);
+                                    $from->hour = $lresult[1];
+                                    if ($start_time->compareDateTime($from) >= 1) {
+                                        $from->mday++;
+                                    }
+                                    $to = clone($from);
+                                    $to->hour = $lresult[2];
+                                    if ($start_time->compareDateTime($to) >= 1) {
+                                        $to->mday++;
+                                    }
+                                    // As we now have type, probability and time for this FMC
+                                    // from our TAF, increase field-counter
+                                    $i += 2;
+                                } else {
+                                    // No timegroup present, so just increase field-counter by one
+                                    $i += 1;
+                                }
+                            } elseif (preg_match('/^(\d{2})(\d{2})\/(\d{2})(\d{2})$/i', $taf[$i + 1], $lresult)) {
+                                // Normal group, set type and use extracted time
+                                $type = $result[1];
+                                // Check for PROBdd
+                                if (isset($result[2])) {
+                                    $probability = $result[2];
+                                }
                                 $from = clone($start_time);
-                                $from->hour = $lresult[1];
+                                $from->hour = $lresult[2];
                                 if ($start_time->compareDateTime($from) >= 1) {
                                     $from->mday++;
                                 }
                                 $to = clone($from);
-                                $to->hour = $lresult[2];
+                                $to->hour = $lresult[4];
                                 if ($start_time->compareDateTime($to) >= 1) {
                                     $to->mday++;
                                 }
-                                // As we now have type, probability and time for this FMC
-                                // from our TAF, increase field-counter
-                                $i += 2;
-                            } else {
-                                // No timegroup present, so just increase field-counter by one
+                                // Same as above, we have a time for this FMC from our TAF,
+                                // increase field-counter
                                 $i += 1;
-                            }
-                        } elseif (preg_match('/^(\d{2})(\d{2})\/(\d{2})(\d{2})$/i', $taf[$i + 1], $lresult)) {
-                            // Normal group, set type and use extracted time
-                            $type = $result[1];
-                            // Check for PROBdd
-                            if (isset($result[2])) {
+                            } elseif (isset($result[2])) {
+                                // This is either a PROBdd or a malformed TAF with missing timegroup
                                 $probability = $result[2];
                             }
-                            $from = clone($start_time);
-                            $from->hour = $lresult[2];
-                            if ($start_time->compareDateTime($from) >= 1) {
-                                $from->mday++;
-                            }
-                            $to = clone($from);
-                            $to->hour = $lresult[4];
-                            if ($start_time->compareDateTime($to) >= 1) {
-                                $to->mday++;
-                            }
-                            // Same as above, we have a time for this FMC from our TAF,
-                            // increase field-counter
-                            $i += 1;
-                        } elseif (isset($result[2])) {
-                            // This is either a PROBdd or a malformed TAF with missing timegroup
-                            $probability = $result[2];
-                        }
 
-                        // Handle the FMC, generate neccessary array if it's the first...
-                        if (isset($type)) {
-                            if (!isset($forecastData['time'][$fromTime]['fmc'])) {
-                                $forecastData['time'][$fromTime]['fmc'] = array();
+                            // Handle the FMC, generate neccessary array if it's the first...
+                            if (isset($type)) {
+                                if (!isset($forecastData['time'][$fromTime]['fmc'])) {
+                                    $forecastData['time'][$fromTime]['fmc'] = [];
+                                }
+                                $forecastData['time'][$fromTime]['fmc'][$fmcCount] = [];
+                                // ...and set pointer.
+                                $pointer = &$forecastData['time'][$fromTime]['fmc'][$fmcCount];
+                                $fmcCount++;
+                                // Insert data
+                                $pointer['type'] = $type;
+                                unset($type);
+                                if (isset($from)) {
+                                    $pointer['from'] = $from;
+                                    $pointer['to']   = $to;
+                                    unset($from, $to);
+                                }
+                                if (isset($probability)) {
+                                    $pointer['probability'] = $probability;
+                                    unset($probability);
+                                }
                             }
-                            $forecastData['time'][$fromTime]['fmc'][$fmcCount] = array();
-                            // ...and set pointer.
-                            $pointer = &$forecastData['time'][$fromTime]['fmc'][$fmcCount];
-                            $fmcCount++;
-                            // Insert data
-                            $pointer['type'] = $type;
-                            unset($type);
-                            if (isset($from)) {
-                                $pointer['from'] = $from;
-                                $pointer['to']   = $to;
-                                unset($from, $to);
-                            }
-                            if (isset($probability)) {
-                                $pointer['probability'] = $probability;
-                                unset($probability);
-                            }
-                        }
-                        break;
-                    default:
-                        // Do nothing
-                        break;
+                            break;
+                        default:
+                            // Do nothing
+                            break;
                     }
                     if ($found) {
                         break;
@@ -460,7 +462,7 @@ class Horde_Service_Weather_Parser_Taf extends Horde_Service_Weather_Parser_Base
      */
     protected function _getTafCodes()
     {
-        return array(
+        return [
             'report'      => 'TAF|AMD',
             'station'     => '\w{4}',
             'update'      => '(\d{2})?(\d{4})Z',
@@ -475,8 +477,8 @@ class Horde_Service_Weather_Parser_Taf extends Horde_Service_Weather_Parser_Base
             'tempmin'     => 'TN(\d{2})\/(\d{2})(\w)',
             'tempmaxmin'  => 'TX(\d{2})\/(\d{2})(\w)TN(\d{2})\/(\d{2})(\w)',
             'from'        => 'FM(\d{2})(\d{2})(\d{2})?Z?',
-            'fmc'         => '(PROB|BECMG|TEMPO)(\d{2})?'
-        );
+            'fmc'         => '(PROB|BECMG|TEMPO)(\d{2})?',
+        ];
     }
 
 }

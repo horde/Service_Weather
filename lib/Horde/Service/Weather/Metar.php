@@ -1,6 +1,7 @@
 <?php
+
 /**
- * Copyright 2016-2017 Horde LLC (http://www.horde.org/)
+ * Copyright 2016-2026 Horde LLC (http://www.horde.org/)
  *
  * @author   Michael J Rubinsky <mrubinsk@horde.org>
  * @license  http://www.horde.org/licenses/bsd BSD
@@ -65,13 +66,13 @@ class Horde_Service_Weather_Metar extends Horde_Service_Weather_Base
      *     - metar_path: (string)             Path or URL to METAR data.
      *     - taf_path: (string)               Path or URL to TAF data.
      */
-    public function __construct(array $params = array())
+    public function __construct(array $params = [])
     {
         // Mini-hack to avoid passing a http_client object if
         // we really don't need it.
-        if (empty($params['http_client']) &&
-            !empty($params['metar_path']) &&
-            !empty($params['taf_path'])) {
+        if (empty($params['http_client'])
+            && !empty($params['metar_path'])
+            && !empty($params['taf_path'])) {
             $params['http_client'] = true;
         }
 
@@ -111,18 +112,18 @@ class Horde_Service_Weather_Metar extends Horde_Service_Weather_Base
             throw new Horde_Service_Weather_Exception('Invalid path to METAR data.');
         }
         switch ($pathinfo['scheme']) {
-        case 'http':
-            $data = $this->_makeRequest($endpoint);
-            break;
-        case 'file':
-            $data = file_get_contents(realpath($endpoint));
-            break;
+            case 'http':
+                $data = $this->_makeRequest($endpoint);
+                break;
+            case 'file':
+                $data = file_get_contents(realpath($endpoint));
+                break;
         }
         if (empty($data)) {
             throw new Horde_Service_Weather_Exception('METAR file not found.');
         }
 
-        $parser = new Horde_Service_Weather_Parser_Metar(array('units' => $this->units));
+        $parser = new Horde_Service_Weather_Parser_Metar(['units' => $this->units]);
         return new Horde_Service_Weather_Current_Metar(
             $parser->parse($data),
             $this
@@ -141,16 +142,16 @@ class Horde_Service_Weather_Metar extends Horde_Service_Weather_Base
     protected function _makeRequest($url, $lifetime = 86400)
     {
         $cachekey = md5('hordeweather' . $url);
-        if ((!empty($this->_cache) && !$results = $this->_cache->get($cachekey, $lifetime)) ||
-            empty($this->_cache)) {
+        if ((!empty($this->_cache) && !$results = $this->_cache->get($cachekey, $lifetime))
+            || empty($this->_cache)) {
             $url = new Horde_Url($url);
-            $response = $this->_http->get((string)$url);
+            $response = $this->_http->get((string) $url);
             if (!$response->code == '200') {
                 throw new Horde_Service_Weather_Exception($response->code);
             }
             $results = $response->getBody();
             if (!empty($this->_cache)) {
-               $this->_cache->set($cachekey, $results);
+                $this->_cache->set($cachekey, $results);
             }
         }
 
@@ -174,8 +175,8 @@ class Horde_Service_Weather_Metar extends Horde_Service_Weather_Base
     public function getForecast(
         $location,
         $length = Horde_Service_Weather::FORECAST_3DAY,
-        $type = Horde_Service_Weather::FORECAST_TYPE_STANDARD)
-    {
+        $type = Horde_Service_Weather::FORECAST_TYPE_STANDARD
+    ) {
         $this->_station = $this->_getStation($location);
 
         // Sniff out type of request.
@@ -188,20 +189,20 @@ class Horde_Service_Weather_Metar extends Horde_Service_Weather_Base
         }
 
         switch ($pathinfo['scheme']) {
-        case 'http':
-            $url = sprintf('%s/%s.TXT', $this->_taf_path, $location);
-            $data = $this->_makeRequest($url);
-            break;
-        case 'file':
-            $data = file_get_contents(realpath($pathinfo['path']));
-            break;
+            case 'http':
+                $url = sprintf('%s/%s.TXT', $this->_taf_path, $location);
+                $data = $this->_makeRequest($url);
+                break;
+            case 'file':
+                $data = file_get_contents(realpath($pathinfo['path']));
+                break;
         }
         if (empty($data)) {
             throw new Horde_Service_Weather_Exception('TAF file not found.');
         }
 
         // Parse the data.
-        $parser = new Horde_Service_Weather_Parser_Taf(array('units' => $this->units));
+        $parser = new Horde_Service_Weather_Parser_Taf(['units' => $this->units]);
         return new Horde_Service_Weather_Forecast_Taf(
             $parser->parse($data),
             $this
@@ -221,14 +222,14 @@ class Horde_Service_Weather_Metar extends Horde_Service_Weather_Base
      */
     public function searchLocations(
         $location,
-        $type = Horde_Service_Weather::SEARCHTYPE_STANDARD)
-    {
+        $type = Horde_Service_Weather::SEARCHTYPE_STANDARD
+    ) {
         try {
             return $this->_getStation($location);
         } catch (Horde_Exception_NotFound $e) {
-            return new Horde_Service_Weather_Station(array(
-                'code' => $location
-            ));
+            return new Horde_Service_Weather_Station([
+                'code' => $location,
+            ]);
         }
     }
 
@@ -240,7 +241,7 @@ class Horde_Service_Weather_Metar extends Horde_Service_Weather_Base
     public function getSupportedForecastLengths()
     {
         // There are no "normal" forecast lengths in TAF data.
-         return array();
+        return [];
     }
 
     /**
@@ -272,7 +273,7 @@ class Horde_Service_Weather_Metar extends Horde_Service_Weather_Base
     public function autocompleteLocation($search)
     {
         if (empty($this->_db)) {
-            return array();
+            return [];
         }
 
         $sql = 'SELECT icao, name, state, municipality, country FROM ' . $this->_tableName . ' WHERE '
@@ -283,7 +284,7 @@ class Horde_Service_Weather_Metar extends Horde_Service_Weather_Base
             throw new Horde_Service_Weather_Exception($e);
         }
 
-        $results = array();
+        $results = [];
         foreach ($rows as $row) {
             $obj = new stdClass();
             $obj->name = sprintf('%s (%s, %s, %s)', $row['name'], $row['municipality'], $row['state'], $row['country']);
@@ -307,7 +308,7 @@ class Horde_Service_Weather_Metar extends Horde_Service_Weather_Base
     protected function _getLocations()
     {
         if (empty($this->_db)) {
-            return array();
+            return [];
         }
         $sql = 'SELECT icao, name, state, municipality, country FROM ' . $this->_tableName . ' ORDER BY country';
         try {
@@ -329,15 +330,15 @@ class Horde_Service_Weather_Metar extends Horde_Service_Weather_Base
     protected function _getStation($code)
     {
         if (empty($this->_db)) {
-            return new Horde_Service_Weather_Station(array(
+            return new Horde_Service_Weather_Station([
                 'code' => $code,
-                'name' => $code
-            ));
+                'name' => $code,
+            ]);
         }
 
         $sql = 'SELECT icao, name, country, latitude, longitude from ' . $this->_tableName . ' WHERE icao = ?';
         try {
-            $result = $this->_db->selectOne($sql, array($code));
+            $result = $this->_db->selectOne($sql, [$code]);
         } catch (Horde_Db_Exception $e) {
             throw new Horde_Service_Weather_Exception($e);
         }
@@ -346,13 +347,13 @@ class Horde_Service_Weather_Metar extends Horde_Service_Weather_Base
             throw new Horde_Exception_NotFound();
         }
 
-        return new Horde_Service_Weather_Station(array(
+        return new Horde_Service_Weather_Station([
             'name' => $result['name'],
             'code' => $code,
             'country_name' => $result['country'],
             'lat' => $result['latitude'],
-            'lon' => $result['longitude']
-        ));
+            'lon' => $result['longitude'],
+        ]);
     }
 
 }

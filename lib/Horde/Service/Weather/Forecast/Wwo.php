@@ -1,9 +1,10 @@
 <?php
+
 /**
  * This file contains the Horde_Service_Weather_Forecast class for abstracting
  * access to forecast data from WorldWideWeather
  *
- * Copyright 2011-2017 Horde LLC (http://www.horde.org/)
+ * Copyright 2011-2026 Horde LLC (http://www.horde.org/)
  *
  * @author   Michael J Rubinsky <mrubinsk@horde.org>
  * @license  http://www.horde.org/licenses/bsd BSD
@@ -19,13 +20,12 @@
  * @package  Service_Weather
  * @deprecated 3.0.0 Use \Horde\Service\Weather\Weather instead. Will be removed in 4.0.0.
  */
- class Horde_Service_Weather_Forecast_Wwo extends Horde_Service_Weather_Forecast_Base
- {
-
+class Horde_Service_Weather_Forecast_Wwo extends Horde_Service_Weather_Forecast_Base
+{
     /**
      * @see Horde_Service_Weather_Forecast_Base::$fields
      */
-    public $fields = array(Horde_Service_Weather::FORECAST_FIELD_WIND);
+    public $fields = [Horde_Service_Weather::FORECAST_FIELD_WIND];
 
     /**
      * Const'r
@@ -35,8 +35,8 @@
     public function __construct(
         $properties,
         Horde_Service_Weather_Base $weather,
-        $type = Horde_Service_Weather::FORECAST_TYPE_STANDARD)
-    {
+        $type = Horde_Service_Weather::FORECAST_TYPE_STANDARD
+    ) {
         parent::__construct($properties, $weather, $type);
         $this->_parseStd();
     }
@@ -70,4 +70,4 @@
         }
     }
 
- }
+}

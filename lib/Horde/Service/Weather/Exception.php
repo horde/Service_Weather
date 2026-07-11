@@ -1,8 +1,9 @@
 <?php
+
 /**
  * Exception handler for the horde/Servcie_Weather package.
  *
- * Copyright 2011-2017 Horde LLC (http://www.horde.org/)
+ * Copyright 2011-2026 Horde LLC (http://www.horde.org/)
  *
  * @author   Michael J Rubinsky <mrubinsk@horde.org>
  * @category Horde
@@ -10,6 +11,4 @@
  * @package  Service_Weather
  * @deprecated 3.0.0 Use \Horde\Service\Weather\Weather instead. Will be removed in 4.0.0.
  */
-class Horde_Service_Weather_Exception extends Horde_Exception_Wrapped
-{
-}
+class Horde_Service_Weather_Exception extends Horde_Exception_Wrapped {}

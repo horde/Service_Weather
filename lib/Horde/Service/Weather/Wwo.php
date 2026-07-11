@@ -1,9 +1,10 @@
 <?php
+
 /**
  * This file contains the Horde_Service_Weather class for communicating with
  * the World Weather Online API.
  *
- * Copyright 2011-2017 Horde LLC (http://www.horde.org/)
+ * Copyright 2011-2026 Horde LLC (http://www.horde.org/)
  *
  * @author   Michael J Rubinsky <mrubinsk@horde.org>
  * @license  http://www.horde.org/licenses/bsd BSD
@@ -21,11 +22,11 @@
  */
 class Horde_Service_Weather_Wwo extends Horde_Service_Weather_Base
 {
-    const API_URL    = 'http://api.worldweatheronline.com/premium/v1/weather.ashx';
-    const SEARCH_URL = 'http://api.worldweatheronline.com/premium/v1/search.ashx';
+    public const API_URL    = 'http://api.worldweatheronline.com/premium/v1/weather.ashx';
+    public const SEARCH_URL = 'http://api.worldweatheronline.com/premium/v1/search.ashx';
 
-    const API_URL_v2 = 'https://api.worldweatheronline.com/premium/v2/weather.ashx';
-    const SEARCH_URL_v2 = 'https://api.worldweatheronline.com/premium/v2/search.ashx';
+    public const API_URL_v2 = 'https://api.worldweatheronline.com/premium/v2/weather.ashx';
+    public const SEARCH_URL_v2 = 'https://api.worldweatheronline.com/premium/v2/search.ashx';
 
     /**
      * @see Horde_Service_Weather_Base::$title
@@ -42,7 +43,7 @@ class Horde_Service_Weather_Wwo extends Horde_Service_Weather_Base
     /**
      * @see Horde_Service_Weather::$iconMap
      */
-    public $iconMap = array(
+    public $iconMap = [
         'wsymbol_0001_sunny' => '32.png',
         'wsymbol_0002_sunny_intervals' => '30.png',
         'wsymbol_0003_white_cloud' => '26.png',
@@ -73,8 +74,8 @@ class Horde_Service_Weather_Wwo extends Horde_Service_Weather_Base
         'wsymbol_0035_cloudy_with_light_snow_night' => '46.png',
         'wsymbol_0036_cloudy_with_heavy_snow_night' => '46.png',
         'wsymbol_0037_cloudy_with_sleet_night' => '8.png',
-        'wsymbol_0040_thunderstorms_night' => '47.png'
-    );
+        'wsymbol_0040_thunderstorms_night' => '47.png',
+    ];
 
     /**
      * Wwo API key.
@@ -103,7 +104,7 @@ class Horde_Service_Weather_Wwo extends Horde_Service_Weather_Base
      *
      * @return Horde_Service_Weather_Wwo
      */
-    public function __construct(array $params = array())
+    public function __construct(array $params = [])
     {
         // Check required api key parameters here...
         if (empty($params['apikey'])) {
@@ -136,8 +137,8 @@ class Horde_Service_Weather_Wwo extends Horde_Service_Weather_Base
     public function getForecast(
         $location,
         $length = Horde_Service_Weather::FORECAST_3DAY,
-        $type = Horde_Service_Weather::FORECAST_TYPE_STANDARD)
-    {
+        $type = Horde_Service_Weather::FORECAST_TYPE_STANDARD
+    ) {
         $this->_getCommonElements($location);
         return $this->_forecast;
     }
@@ -150,9 +151,9 @@ class Horde_Service_Weather_Wwo extends Horde_Service_Weather_Base
     public function searchLocations($location, $type = Horde_Service_Weather::SEARCHTYPE_STANDARD)
     {
         switch ($type) {
-        case Horde_Service_Weather::SEARCHTYPE_STANDARD:
-        case Horde_Service_Weather::SEARCHTYPE_IP:
-            return $this->_parseSearchLocations($this->_searchLocations($location));
+            case Horde_Service_Weather::SEARCHTYPE_STANDARD:
+            case Horde_Service_Weather::SEARCHTYPE_IP:
+                return $this->_parseSearchLocations($this->_searchLocations($location));
         }
     }
 
@@ -164,10 +165,10 @@ class Horde_Service_Weather_Wwo extends Horde_Service_Weather_Base
     public function autocompleteLocation($search)
     {
         $url = new Horde_Url($this->_version == 1 ? self::SEARCH_URL : self::SEARCH_URL_v2);
-        $url->add(array(
+        $url->add([
             'q' => $search,
             'format' => 'json',
-            'num_of_results' => 25));
+            'num_of_results' => 25]);
 
         return $this->_parseAutocomplete($this->_makeRequest($url));
     }
@@ -177,13 +178,13 @@ class Horde_Service_Weather_Wwo extends Horde_Service_Weather_Base
      *
      * @see Horde_Service_Weather_Base::getSupportedForecastLengths
      */
-     public function getSupportedForecastLengths()
-     {
-         return array(
+    public function getSupportedForecastLengths()
+    {
+        return [
             3 => Horde_Service_Weather::FORECAST_3DAY,
-            5 => Horde_Service_Weather::FORECAST_5DAY
-         );
-     }
+            5 => Horde_Service_Weather::FORECAST_5DAY,
+        ];
+    }
 
     /**
      * Populates some common data used by forecasts and current conditions.
@@ -207,26 +208,29 @@ class Horde_Service_Weather_Wwo extends Horde_Service_Weather_Base
 
         $url = new Horde_Url($this->_version == 1 ? self::API_URL : self::API_URL_v2);
         // Not sure why, but Wwo chokes if we urlencode the location?
-        $url->add(array(
-            'q' => $location,
-            'num_of_days' => $length,
-            'includeLocation' => 'yes',
-            'extra' => 'localObsTime')
+        $url->add(
+            [
+                'q' => $location,
+                'num_of_days' => $length,
+                'includeLocation' => 'yes',
+                'extra' => 'localObsTime']
         );
 
         if ($this->_version == 1) {
-            $url->add(array(
-                'timezone' => 'yes')
+            $url->add(
+                [
+                    'timezone' => 'yes']
             );
         }
 
         // V2 of the API only returns hourly data, so ask for 24 hour avg.
         // @todo Revisit when we support hourly forecast data.
         if ($this->_version == 2) {
-            $url->add(array(
-                'tp' => 24,
-                'showlocaltime' => 'yes',
-                'showmap' => 'yes')
+            $url->add(
+                [
+                    'tp' => 24,
+                    'showlocaltime' => 'yes',
+                    'showmap' => 'yes']
             );
         }
 
@@ -259,16 +263,18 @@ class Horde_Service_Weather_Wwo extends Horde_Service_Weather_Base
                 $date->timestamp(),
                 SUNFUNCS_RET_TIMESTAMP,
                 $station->lat,
-                $station->lon)
+                $station->lon
+            )
         );
         $station->sunrise = new Horde_Date(
             date_sunrise(
                 $date->timestamp(),
                 SUNFUNCS_RET_TIMESTAMP,
                 $station->lat,
-                $station->lon)
+                $station->lon
+            )
         );
-        $station->time = (string)$date;
+        $station->time = (string) $date;
         $this->_station = $station;
         $this->_forecast = $this->_parseForecast($results->data->weather);
     }
@@ -282,7 +288,7 @@ class Horde_Service_Weather_Wwo extends Horde_Service_Weather_Base
      */
     protected function _parseStation($station)
     {
-        $properties = array(
+        $properties = [
             'name' => $station->areaName[0]->value . ', ' . $station->region[0]->value,
             'city' => $station->areaName[0]->value,
             'state' => $station->region[0]->value,
@@ -291,8 +297,8 @@ class Horde_Service_Weather_Wwo extends Horde_Service_Weather_Base
             'lat' => $station->latitude,
             'lon' => $station->longitude,
             'zip' => '',
-            'code' => $station->latitude . ',' . $station->longitude
-        );
+            'code' => $station->latitude . ',' . $station->longitude,
+        ];
 
         if (isset($station->timezone)) {
             // Only the *current* UTC offset is provided, with no indication
@@ -334,9 +340,9 @@ class Horde_Service_Weather_Wwo extends Horde_Service_Weather_Base
 
     protected function _parseAutocomplete($results)
     {
-        $return = array();
+        $return = [];
         if (!empty($results->search_api->result)) {
-            foreach($results->search_api->result as $result) {
+            foreach ($results->search_api->result as $result) {
                 if (!empty($result->region[0]->value)) {
                     $new = new stdClass();
                     $new->name = $result->areaName[0]->value . ', ' . $result->region[0]->value;
@@ -359,10 +365,10 @@ class Horde_Service_Weather_Wwo extends Horde_Service_Weather_Base
     protected function _searchLocations($location)
     {
         $url = new Horde_Url($this->_version == 1 ? self::SEARCH_URL : self::SEARCH_URL_v2);
-        $url = $url->add(array(
+        $url = $url->add([
             'timezone' => 'yes',
             'q' => $location,
-            'num_of_results' => 10));
+            'num_of_results' => 10]);
 
         return $this->_makeRequest($url);
     }
@@ -380,7 +386,7 @@ class Horde_Service_Weather_Wwo extends Horde_Service_Weather_Base
             return $this->_parseStation($response->search_api->result[0]);
         }
 
-        return array();
+        return [];
     }
 
     /**
@@ -393,32 +399,33 @@ class Horde_Service_Weather_Wwo extends Horde_Service_Weather_Base
      */
     protected function _makeRequest(Horde_Url $url)
     {
-        $url->add(array(
+        $url->add([
             'format' => 'json',
-            'key' => $this->_key
-        ))->setRaw(true);
+            'key' => $this->_key,
+        ])->setRaw(true);
 
         $cachekey = md5('hordeweather' . $url);
-        if ((!empty($this->_cache) &&
-             !($results = $this->_cache->get($cachekey, $this->_cache_lifetime))) ||
-            empty($this->_cache)) {
-            $response = $this->_http->get((string)$url);
+        if ((!empty($this->_cache)
+             && !($results = $this->_cache->get($cachekey, $this->_cache_lifetime)))
+            || empty($this->_cache)) {
+            $response = $this->_http->get((string) $url);
             if (!$response->code == '200') {
                 throw new Horde_Service_Weather_Exception($response->code);
             }
             $results = $response->getBody();
             if (!empty($this->_cache)) {
-               $this->_cache->set($cachekey, $results);
+                $this->_cache->set($cachekey, $results);
             }
         }
         $results = Horde_Serialize::unserialize($results, Horde_Serialize::JSON);
         if (!($results instanceof StdClass)) {
             throw new Horde_Service_Weather_Exception(sprintf(
                 'Error, unable to decode response: %s',
-                $results));
+                $results
+            ));
         }
 
         return $results;
     }
 
- }
+}

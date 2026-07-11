@@ -1,10 +1,11 @@
 <?php
+
 /**
  * This file contains the Horde_Service_Weather_Forecast class for abstracting
  * access to forecast data. Provides a simple iterator for a collection of
  * forecast periods.
  *
- * Copyright 2011-2017 Horde LLC (http://www.horde.org/)
+ * Copyright 2011-2026 Horde LLC (http://www.horde.org/)
  *
  * @author   Michael J Rubinsky <mrubinsk@horde.org>
  * @license  http://www.horde.org/licenses/bsd BSD
@@ -20,21 +21,21 @@
  * @package  Service_Weather
  * @deprecated 3.0.0 Use \Horde\Service\Weather\Weather instead. Will be removed in 4.0.0.
  */
- abstract class Horde_Service_Weather_Forecast_Base implements IteratorAggregate
- {
+abstract class Horde_Service_Weather_Forecast_Base implements IteratorAggregate
+{
     /**
      * The forecast properties as returned from the forecast request.
      *
      * @var array
      */
-    protected $_properties = array();
+    protected $_properties = [];
 
     /**
      * Local cache of forecast periods
      *
      * @var array
      */
-    protected $_periods = array();
+    protected $_periods = [];
 
     /**
      * Forecast type
@@ -62,7 +63,7 @@
      *
      * @var array
      */
-    public $fields = array();
+    public $fields = [];
 
     /**
      * Advertise how detailed the forecast period is.
@@ -86,8 +87,8 @@
     public function __construct(
         $properties,
         Horde_Service_Weather_Base $weather,
-        $type = Horde_Service_Weather::FORECAST_TYPE_STANDARD)
-    {
+        $type = Horde_Service_Weather::FORECAST_TYPE_STANDARD
+    ) {
         $this->_properties = $properties;
         $this->weather = $weather;
         $this->_type = $type;
@@ -134,4 +135,4 @@
         return new ArrayIterator(array_slice($this->_periods, 0, $this->_maxDays));
     }
 
- }
+}
