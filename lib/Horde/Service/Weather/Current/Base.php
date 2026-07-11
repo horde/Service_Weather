@@ -1,9 +1,10 @@
 <?php
+
 /**
  * This file contains the Horde_Service_Weather_Current_Base class for
  * abstracting access to current observations.
  *
- * Copyright 2011-2017 Horde LLC (http://www.horde.org/)
+ * Copyright 2011-2026 Horde LLC (http://www.horde.org/)
  *
  * @author   Michael J Rubinsky <mrubinsk@horde.org>
  * @license  http://www.horde.org/licenses/bsd BSD
@@ -46,15 +47,15 @@
  * @package  Service_Weather
  * @deprecated 3.0.0 Use \Horde\Service\Weather\Weather instead. Will be removed in 4.0.0.
  */
- class Horde_Service_Weather_Current_Base
- {
+class Horde_Service_Weather_Current_Base
+{
     /**
      * Local properties cache. Property names differ depending on the backend.
      * Concrete classes map them to the available properties.
      *
      * @var array
      */
-    protected $_properties = array();
+    protected $_properties = [];
 
     /**
      * Parent weather object.
@@ -85,4 +86,4 @@
         throw new Horde_Service_Weather_Exception_InvalidProperty('This station does not support that property');
     }
 
- }
+}

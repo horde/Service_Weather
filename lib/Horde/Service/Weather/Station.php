@@ -1,9 +1,10 @@
 <?php
+
 /**
  * This file contains the Horde_Service_Weather_Station class for abstracting
  * access to station descriptors.
  *
- * Copyright 2011-2017 Horde LLC (http://www.horde.org/)
+ * Copyright 2011-2026 Horde LLC (http://www.horde.org/)
  *
  * @author   Michael J Rubinsky <mrubinsk@horde.org>
  * @license  http://www.horde.org/licenses/bsd BSD
@@ -38,14 +39,14 @@ class Horde_Service_Weather_Station
      *
      * @var array
      */
-    protected $_properties = array();
+    protected $_properties = [];
 
     /**
      * Const'r
      *
      * @param array $properties  The properties for the station.
      */
-    public function __construct($properties = array())
+    public function __construct($properties = [])
     {
         $this->_properties = $properties;
     }

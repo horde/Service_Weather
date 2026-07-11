@@ -1,9 +1,10 @@
 <?php
+
 /**
  * This file contains the Horde_Service_Weather_Forecast class for abstracting
  * access to forecast data from WorldWideWeather using the V2 API.
  *
- * Copyright 2011-2017 Horde LLC (http://www.horde.org/)
+ * Copyright 2011-2026 Horde LLC (http://www.horde.org/)
  *
  * @author   Michael J Rubinsky <mrubinsk@horde.org>
  * @license  http://www.horde.org/licenses/bsd BSD
@@ -19,15 +20,15 @@
  * @package  Service_Weather
  * @deprecated 3.0.0 Use \Horde\Service\Weather\Weather instead. Will be removed in 4.0.0.
  */
- class Horde_Service_Weather_Forecast_Wwov2 extends Horde_Service_Weather_Forecast_Wwo
- {
+class Horde_Service_Weather_Forecast_Wwov2 extends Horde_Service_Weather_Forecast_Wwo
+{
     /**
      * @see Horde_Service_Weather_Forecast_Base::$fields
      */
-    public $fields = array(
+    public $fields = [
         Horde_Service_Weather::FORECAST_FIELD_WIND,
         Horde_Service_Weather::FORECAST_FIELD_HUMIDITY,
-        Horde_Service_Weather::FORECAST_FIELD_PRECIPITATION);
+        Horde_Service_Weather::FORECAST_FIELD_PRECIPITATION];
 
     /**
      * Parse a stdRequest
@@ -56,4 +57,4 @@
         }
     }
 
- }
+}

@@ -1,9 +1,10 @@
 <?php
+
 /**
  * This file contains the Horde_Service_Weather_Alerts_Base class for
  * abstracting access to weather alerts.
  *
- * Copyright 2011-2017 Horde LLC (http://www.horde.org/)
+ * Copyright 2011-2026 Horde LLC (http://www.horde.org/)
  *
  * @author   Michael J Rubinsky <mrubinsk@horde.org>
  * @license  http://www.horde.org/licenses/bsd BSD
@@ -14,7 +15,7 @@
 class Horde_Service_Weather_Alerts_Base implements IteratorAggregate
 {
     protected $_properties;
-    protected $_parsedAlerts = array();
+    protected $_parsedAlerts = [];
 
     protected $_typeMap;
     protected $_significanceMap;
@@ -23,7 +24,7 @@ class Horde_Service_Weather_Alerts_Base implements IteratorAggregate
     {
         $this->_properties = $properties;
         $this->_weather = $weather;
-        $this->_typeMap = array(
+        $this->_typeMap = [
             'HUR' => Horde_Service_Weather_Translation::t("Hurricane Local Statement"),
             'TOR' => Horde_Service_Weather_Translation::t("Tornado Warning"),
             'TOW' => Horde_Service_Weather_Translation::t("Tornado Watch"),
@@ -43,17 +44,17 @@ class Horde_Service_Weather_Alerts_Base implements IteratorAggregate
             'REC' => Horde_Service_Weather_Translation::t("Record Set"),
             'REP' => Horde_Service_Weather_Translation::t("Public Reports"),
             'PUB' => Horde_Service_Weather_Translation::t("Public Information Statement"),
-        );
+        ];
 
-        $this->_significanceMap = array(
+        $this->_significanceMap = [
             'W' => Horde_Service_Weather_Translation::t("Warning"),
             'A' => Horde_Service_Weather_Translation::t("Watch"),
             'Y' => Horde_Service_Weather_Translation::t("Advisory"),
             'S' => Horde_Service_Weather_Translation::t("Statement"),
             'F' => Horde_Service_Weather_Translation::t("Forecast"),
             'O' => Horde_Service_Weather_Translation::t("Outlook"),
-            'N' => Horde_Service_Weather_Translation::t("Synopsis")
-        );
+            'N' => Horde_Service_Weather_Translation::t("Synopsis"),
+        ];
     }
 
     public function getAlerts()
