@@ -1,0 +1,60 @@
+{
+  "cod": "200",
+  "message": 0,
+  "cnt": 16,
+  "list": [
+    {
+      "dt": 1783600000,
+      "main": {"temp": 21.5, "humidity": 62, "pressure": 1015},
+      "weather": [{"id": 803, "main": "Clouds", "description": "broken clouds"}],
+      "clouds": {"all": 75},
+      "wind": {"speed": 4.5, "deg": 220},
+      "pop": 0.1,
+      "dt_txt": "2026-07-09 12:00:00"
+    },
+    {
+      "dt": 1783610800,
+      "main": {"temp": 22.0, "humidity": 60, "pressure": 1014},
+      "weather": [{"id": 803, "main": "Clouds", "description": "broken clouds"}],
+      "clouds": {"all": 70},
+      "wind": {"speed": 5.0, "deg": 225},
+      "pop": 0.15,
+      "dt_txt": "2026-07-09 15:00:00"
+    },
+    {
+      "dt": 1783621600,
+      "main": {"temp": 19.0, "humidity": 70, "pressure": 1014},
+      "weather": [{"id": 501, "main": "Rain", "description": "moderate rain"}],
+      "clouds": {"all": 90},
+      "wind": {"speed": 4.0, "deg": 210},
+      "pop": 0.6,
+      "rain": {"3h": 2.5},
+      "dt_txt": "2026-07-09 18:00:00"
+    },
+    {
+      "dt": 1783686400,
+      "main": {"temp": 24.0, "humidity": 55, "pressure": 1016},
+      "weather": [{"id": 800, "main": "Clear", "description": "clear sky"}],
+      "clouds": {"all": 5},
+      "wind": {"speed": 3.0, "deg": 200},
+      "pop": 0.0,
+      "dt_txt": "2026-07-10 12:00:00"
+    },
+    {
+      "dt": 1783772800,
+      "main": {"temp": 26.0, "humidity": 50, "pressure": 1018},
+      "weather": [{"id": 800, "main": "Clear", "description": "clear sky"}],
+      "clouds": {"all": 0},
+      "wind": {"speed": 2.5, "deg": 190},
+      "pop": 0.0,
+      "dt_txt": "2026-07-11 12:00:00"
+    }
+  ],
+  "city": {
+    "id": 2950159,
+    "name": "Berlin",
+    "coord": {"lat": 52.52, "lon": 13.41},
+    "country": "DE",
+    "timezone": 7200
+  }
+}

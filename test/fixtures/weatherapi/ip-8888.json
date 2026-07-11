@@ -1,0 +1,17 @@
+{
+  "ip": "8.8.8.8",
+  "type": "ipv4",
+  "continent_code": "NA",
+  "continent_name": "North America",
+  "country_code": "US",
+  "country_name": "United States of America",
+  "is_eu": false,
+  "geoname_id": 4744870,
+  "city": "Ashburn",
+  "region": "Virginia",
+  "lat": 39.0469,
+  "lon": -77.4903,
+  "tz_id": "America/New_York",
+  "localtime_epoch": 1783600000,
+  "localtime": "2026-07-09 10:00"
+}

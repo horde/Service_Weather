@@ -13,6 +13,7 @@
  *
  * @author  Jan Schneider <jan@horde.org>
  * @package Service_Weather
+ * @deprecated 3.0.0 Use \Horde\Service\Weather\Weather instead. Will be removed in 4.0.0.
  */
 class Horde_Service_Weather_Translation extends Horde_Translation_Autodetect
 {

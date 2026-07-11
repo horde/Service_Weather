@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Horde_Service_Weather tests
  *
@@ -10,12 +11,17 @@
  * @author     Michael J Rubinsky <mrubinsk@horde.org>
  * @license    http://www.horde.org/licenses/bsd BSD
  */
-namespace Horde\Service\Weather;
-use PHPUnit\Framework\TestCase;
-use \Horde_Service_Weather;
-use \Horde_Service_Weather_Metar;
-use \Horde_Service_Weather_Translation;
 
+namespace Horde\Service\Weather;
+
+use PHPUnit\Framework\TestCase;
+use Horde_Service_Weather;
+use Horde_Service_Weather_Metar;
+use Horde_Service_Weather_Translation;
+
+/**
+ * @coversNothing
+ */
 class MetarTest extends TestCase
 {
     public function testCurrentConditions()
@@ -50,7 +56,7 @@ class MetarTest extends TestCase
         // Wind
         $this->assertEquals('SW', $conditions->wind_direction);
         $this->assertEquals(220, $conditions->wind_degrees);
-        $this->assertEquals('2016-08-12 19:54:00', (string)$conditions->time);
+        $this->assertEquals('2016-08-12 19:54:00', (string) $conditions->time);
 
         // METAR specific stuff.
         $this->assertEquals(Horde_Service_Weather_Translation::t('scattered'), $conditions->clouds[0]['amount']);
@@ -84,7 +90,7 @@ class MetarTest extends TestCase
         $weather = $this->_getWeatherDriver();
 
         $forecast = $weather->getForecast('KSAW');
-        $this->assertEquals('2016-08-13 03:59:00', (string)$forecast->getForecastTime());
+        $this->assertEquals('2016-08-13 03:59:00', (string) $forecast->getForecastTime());
 
         $dayOne = $forecast->getForecastDay(0);
         $this->assertInstanceOf('Horde_Service_Weather_Period_Taf', $dayOne);
@@ -103,9 +109,9 @@ class MetarTest extends TestCase
 
     protected function _getWeatherDriver()
     {
-        return new Horde_Service_Weather_Metar(array(
+        return new Horde_Service_Weather_Metar([
             'metar_path' => dirname(__FILE__) . '/fixtures/metar',
-            'taf_path' => dirname(__FILE__) . '/fixtures/taf'
-        ));
+            'taf_path' => dirname(__FILE__) . '/fixtures/taf',
+        ]);
     }
 }

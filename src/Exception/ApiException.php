@@ -17,6 +17,4 @@ use Horde\Service\Weather\WeatherException;
  * @license  http://www.horde.org/licenses/bsd BSD
  * @package  Service_Weather
  */
-class ApiException extends WeatherException
-{
-}
+class ApiException extends WeatherException {}

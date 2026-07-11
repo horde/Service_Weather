@@ -22,8 +22,7 @@ final readonly class Location
         public ?string $name = null,
         public ?string $country = null,
         public ?string $identifier = null
-    ) {
-    }
+    ) {}
 
     /**
      * Create from coordinates.
@@ -66,6 +65,20 @@ final readonly class Location
             null,
             $identifier
         );
+    }
+
+    /**
+     * Create from a fully-resolved geocoded result (typically from a
+     * LocationSearch provider). Carries both coordinates and human-
+     * readable name/country labels.
+     */
+    public static function fromGeocoded(
+        Coordinate $coordinate,
+        ?string $name = null,
+        ?string $country = null,
+        ?string $identifier = null,
+    ): self {
+        return new self($coordinate, $name, $country, $identifier);
     }
 
     /**

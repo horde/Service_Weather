@@ -22,8 +22,7 @@ final readonly class Pressure
      */
     public function __construct(
         private float $millibars
-    ) {
-    }
+    ) {}
 
     /**
      * Create from millibars (same as hectopascals).

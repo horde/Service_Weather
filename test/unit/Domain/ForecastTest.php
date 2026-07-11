@@ -7,6 +7,7 @@ namespace Horde\Service\Weather\Test\Domain;
 use DateTimeImmutable;
 use Horde\Service\Weather\Domain\Forecast;
 use Horde\Service\Weather\Domain\ForecastPeriod;
+use Horde\Service\Weather\ValueObject\ForecastDetail;
 use Horde\Service\Weather\ValueObject\Location;
 use Horde\Service\Weather\ValueObject\Temperature;
 use Horde\Service\Weather\ValueObject\WeatherCondition;
@@ -123,5 +124,65 @@ class ForecastTest extends TestCase
 
         $this->assertNull($forecast->getPeriod(0));
         $this->assertNull($forecast->getPeriod(10));
+    }
+
+    public function testDetailDefaultsToDaily(): void
+    {
+        $forecast = new Forecast(Location::fromCoordinates(0, 0), []);
+        $this->assertSame(ForecastDetail::DAILY, $forecast->detail);
+        $this->assertSame(ForecastDetail::DAILY, $forecast->getDetail());
+    }
+
+    public function testDetailCanBeDetailed(): void
+    {
+        $forecast = new Forecast(
+            Location::fromCoordinates(0, 0),
+            [],
+            ForecastDetail::DETAILED,
+        );
+        $this->assertSame(ForecastDetail::DETAILED, $forecast->getDetail());
+    }
+
+    public function testIsCountable(): void
+    {
+        $p1 = new ForecastPeriod(
+            new DateTimeImmutable('2026-07-09'),
+            Temperature::fromCelsius(20),
+            WeatherCondition::CLEAR,
+        );
+        $p2 = new ForecastPeriod(
+            new DateTimeImmutable('2026-07-10'),
+            Temperature::fromCelsius(22),
+            WeatherCondition::PARTLY_CLOUDY,
+        );
+
+        $forecast = new Forecast(Location::fromCoordinates(0, 0), [$p1, $p2]);
+
+        $this->assertSame(2, count($forecast));
+        $this->assertCount(2, $forecast);
+        $this->assertSame(2, $forecast->count());
+    }
+
+    public function testIsIterable(): void
+    {
+        $p1 = new ForecastPeriod(
+            new DateTimeImmutable('2026-07-09'),
+            Temperature::fromCelsius(20),
+            WeatherCondition::CLEAR,
+        );
+        $p2 = new ForecastPeriod(
+            new DateTimeImmutable('2026-07-10'),
+            Temperature::fromCelsius(22),
+            WeatherCondition::PARTLY_CLOUDY,
+        );
+
+        $forecast = new Forecast(Location::fromCoordinates(0, 0), [$p1, $p2]);
+
+        $collected = [];
+        foreach ($forecast as $p) {
+            $collected[] = $p;
+        }
+
+        $this->assertSame([$p1, $p2], $collected);
     }
 }

@@ -80,4 +80,34 @@ enum WeatherCondition: string
             self::UNKNOWN => '00',
         };
     }
+
+    /**
+     * Get a stable semantic icon slug for UI display.
+     *
+     * Unlike getIconCode() (which returns OpenWeatherMap-style numeric
+     * codes), this returns a kebab-case slug describing the condition.
+     * Consumers concatenate it against their theme's icon path, e.g.
+     * `weather/32x32/{slug}.png`. New blocks and themes are expected
+     * to ship an icon set keyed by these slugs.
+     */
+    public function getIcon(): string
+    {
+        return match ($this) {
+            self::CLEAR => 'clear',
+            self::PARTLY_CLOUDY => 'partly-cloudy',
+            self::CLOUDY => 'cloudy',
+            self::OVERCAST => 'overcast',
+            self::FOG => 'fog',
+            self::DRIZZLE => 'drizzle',
+            self::RAIN => 'rain',
+            self::FREEZING_RAIN => 'freezing-rain',
+            self::SNOW => 'snow',
+            self::SLEET => 'sleet',
+            self::THUNDERSTORM => 'thunderstorm',
+            self::HAIL => 'hail',
+            self::TORNADO => 'tornado',
+            self::HURRICANE => 'hurricane',
+            self::UNKNOWN => 'unknown',
+        };
+    }
 }

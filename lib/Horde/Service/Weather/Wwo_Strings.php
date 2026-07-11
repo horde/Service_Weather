@@ -3,6 +3,7 @@
  * List of strings needed to translate for Wwo. Never loaded, so
  * use of _ shortcut here is fine.
  *
+ * @deprecated 3.0.0 Use \Horde\Service\Weather\Weather instead. Will be removed in 4.0.0.
  * @package Service_Weather
  */
 _("Moderate or heavy snow in area with thunder");

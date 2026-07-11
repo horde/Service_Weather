@@ -5,6 +5,10 @@
  *
  * NOTE: This only generates the schema. To populate data, one must run
  * the horde-service-weather-metar-database script.
+ *
+ * @method \Horde_Db_Adapter_Base_TableDefinition createTable(string $name, array $options = array())
+ * @method void dropTable(string $name)
+ * @method array<int, string> tables()
  */
 class HordeServiceWeatherAirportsChange extends Horde_Db_Migration_Base
 {

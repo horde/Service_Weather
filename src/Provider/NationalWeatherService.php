@@ -5,14 +5,20 @@ declare(strict_types=1);
 namespace Horde\Service\Weather\Provider;
 
 use DateTimeImmutable;
-use Horde\Http\Client;
+use Horde\Service\Weather\CachingHttpClient;
 use Horde\Service\Weather\Domain\CurrentWeather;
 use Horde\Service\Weather\Domain\Forecast;
 use Horde\Service\Weather\Domain\ForecastPeriod;
+use Horde\Service\Weather\Domain\Station;
 use Horde\Service\Weather\Domain\Wind;
 use Horde\Service\Weather\Exception\ApiException;
 use Horde\Service\Weather\Exception\InvalidLocationException;
+use Horde\Service\Weather\Exception\StationNotFoundException;
+use Horde\Service\Weather\ForecastCapabilities;
+use Horde\Service\Weather\HourlyForecast;
+use Horde\Service\Weather\StationLookup;
 use Horde\Service\Weather\ValueObject\Coordinate;
+use Horde\Service\Weather\ValueObject\ForecastDetail;
 use Horde\Service\Weather\ValueObject\Humidity;
 use Horde\Service\Weather\ValueObject\Location;
 use Horde\Service\Weather\ValueObject\Pressure;
@@ -21,15 +27,22 @@ use Horde\Service\Weather\ValueObject\Temperature;
 use Horde\Service\Weather\ValueObject\WeatherCondition;
 use Horde\Service\Weather\ValueObject\WeatherConfig;
 use Horde\Service\Weather\ValueObject\WindDirection;
-use Horde\Service\Weather\WeatherProviderInterface;
+use Horde\Service\Weather\WeatherProvider;
+use Psr\Http\Client\ClientExceptionInterface;
+use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestFactoryInterface;
+use Psr\Http\Message\ResponseFactoryInterface;
+use Psr\Http\Message\StreamFactoryInterface;
 
 /**
  * US National Weather Service (NWS) API provider.
  *
- * Official US government weather data.
- * - Free, unlimited, no API key required
- * - US locations only
- * - High quality official data
+ * NOAA-run public API. US locations only. No API key required.
+ * Custom User-Agent identifying the caller is required by NWS terms.
+ *
+ * Implements StationLookup: NWS observations are inherently
+ * station-based (each `/points/{lat,lon}` resolves to the closest
+ * observation stations, and each station has an ICAO-shaped id).
  *
  * API: https://www.weather.gov/documentation/services-web-api
  *
@@ -41,14 +54,42 @@ use Horde\Service\Weather\WeatherProviderInterface;
  * @license  http://www.horde.org/licenses/bsd BSD
  * @package  Service_Weather
  */
-class NationalWeatherService implements WeatherProviderInterface
+class NationalWeatherService implements WeatherProvider, StationLookup, ForecastCapabilities, HourlyForecast
 {
     private const API_BASE = 'https://api.weather.gov';
 
+    private readonly ClientInterface $httpClient;
+    private readonly RequestFactoryInterface $requestFactory;
+
     public function __construct(
-        private readonly Client $httpClient,
-        private readonly WeatherConfig $config = new WeatherConfig()
+        ClientInterface $httpClient,
+        RequestFactoryInterface $requestFactory,
+        private readonly WeatherConfig $config = new WeatherConfig(),
+        ?ResponseFactoryInterface $responseFactory = null,
+        ?StreamFactoryInterface $streamFactory = null,
     ) {
+        $this->requestFactory = $requestFactory;
+        if ($config->cache !== null && $responseFactory !== null && $streamFactory !== null) {
+            $this->httpClient = new CachingHttpClient(
+                $httpClient,
+                $responseFactory,
+                $streamFactory,
+                $config->cache,
+                $config->cacheLifetime,
+            );
+        } else {
+            $this->httpClient = $httpClient;
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * NWS grid forecast covers roughly 7 days.
+     */
+    public function getSupportedForecastLengths(): array
+    {
+        return [1, 2, 3, 4, 5, 6, 7];
     }
 
     /**
@@ -58,23 +99,12 @@ class NationalWeatherService implements WeatherProviderInterface
     {
         $coordinate = $this->normalizeLocation($location);
 
-        // Step 1: Get grid point data for the location
-        $pointUrl = $this->buildUrl('/points/' . $coordinate->latitude . ',' . $coordinate->longitude);
-        $pointData = $this->makeRequest($pointUrl);
-
-        // Step 2: Get latest observation from the nearest station
-        $stationsUrl = $pointData['properties']['observationStations'];
-        $stationsData = $this->makeRequest($stationsUrl);
-
-        if (empty($stationsData['features'])) {
+        $stations = $this->findStationsNear($coordinate, 1);
+        if ($stations === []) {
             throw new ApiException('No weather stations found for this location');
         }
 
-        $stationId = basename($stationsData['features'][0]['id']);
-        $observationUrl = $this->buildUrl('/stations/' . $stationId . '/observations/latest');
-        $obsData = $this->makeRequest($observationUrl);
-
-        return $this->parseCurrentWeather($obsData, $location);
+        return $this->fetchLatestObservation($stations[0], $location);
     }
 
     /**
@@ -84,15 +114,151 @@ class NationalWeatherService implements WeatherProviderInterface
     {
         $coordinate = $this->normalizeLocation($location);
 
-        // Step 1: Get grid point data
-        $pointUrl = $this->buildUrl('/points/' . $coordinate->latitude . ',' . $coordinate->longitude);
-        $pointData = $this->makeRequest($pointUrl);
-
-        // Step 2: Get forecast
+        // Grid-based forecast. Comes off /points/, not off a station.
+        $pointData = $this->fetchPointData($coordinate);
         $forecastUrl = $pointData['properties']['forecast'];
         $forecastData = $this->makeRequest($forecastUrl);
 
         return $this->parseForecast($forecastData, $location);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * NWS's /gridpoints/{office}/{gx},{gy}/forecast/hourly endpoint provides
+     * per-hour forecasts up to ~156 hours (~6.5 days). The URL is discovered
+     * via /points/{lat,lon} on the `forecastHourly` property.
+     */
+    public function getHourlyForecast(Location $location, int $hours = 48): Forecast
+    {
+        if (!$location->hasCoordinates()) {
+            throw new InvalidLocationException(
+                'NWS requires coordinate-based locations'
+            );
+        }
+        $coordinate = $location->getCoordinate();
+        $hours = max(1, min($hours, 156));
+
+        $pointData = $this->fetchPointData($coordinate);
+        $hourlyUrl = $pointData['properties']['forecastHourly'] ?? null;
+        if (!is_string($hourlyUrl) || $hourlyUrl === '') {
+            throw new ApiException('NWS point response did not include forecastHourly URL');
+        }
+
+        $data = $this->makeRequest($hourlyUrl);
+
+        return $this->parseHourlyForecast($data, $location, $hours);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getStation(string $identifier): Station
+    {
+        $url = $this->buildUrl('/stations/' . rawurlencode($identifier));
+
+        try {
+            $data = $this->makeRequest($url);
+        } catch (ApiException $e) {
+            throw new StationNotFoundException(
+                'NWS station not found: ' . $identifier,
+                0,
+                $e
+            );
+        }
+
+        return $this->parseStation($data);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function findStationsNear(Coordinate $coordinate, int $limit = 5): array
+    {
+        $pointData = $this->fetchPointData($coordinate);
+
+        $stationsUrl = $pointData['properties']['observationStations'] ?? null;
+        if (!is_string($stationsUrl) || $stationsUrl === '') {
+            return [];
+        }
+
+        $stationsData = $this->makeRequest($stationsUrl);
+        $features = $stationsData['features'] ?? [];
+        if ($features === []) {
+            return [];
+        }
+
+        $stations = [];
+        foreach (array_slice($features, 0, max(1, $limit)) as $feature) {
+            $stations[] = $this->parseStation($feature);
+        }
+
+        return $stations;
+    }
+
+    /**
+     * Fetch NWS point metadata (grid + station list URLs).
+     *
+     * @return array<string, mixed>
+     */
+    private function fetchPointData(Coordinate $coordinate): array
+    {
+        $pointUrl = $this->buildUrl('/points/' . $coordinate->latitude . ',' . $coordinate->longitude);
+
+        return $this->makeRequest($pointUrl);
+    }
+
+    /**
+     * Fetch and parse the latest observation for a station.
+     */
+    private function fetchLatestObservation(Station $station, Location|string $originalLocation): CurrentWeather
+    {
+        $observationUrl = $this->buildUrl('/stations/' . rawurlencode($station->identifier) . '/observations/latest');
+        $obsData = $this->makeRequest($observationUrl);
+
+        return $this->parseCurrentWeather($obsData, $originalLocation);
+    }
+
+    /**
+     * Parse a NWS station feature or full-station document into a Station.
+     */
+    private function parseStation(array $data): Station
+    {
+        // /stations/{id} returns a Feature at the top; /observationStations
+        // returns a FeatureCollection whose features[] are also Features.
+        // Both have the same shape at this level.
+        $props = $data['properties'] ?? [];
+        $geometry = $data['geometry'] ?? [];
+
+        $identifier = $props['stationIdentifier'] ?? ($props['identifier'] ?? '');
+        if ($identifier === '' && isset($data['id'])) {
+            $identifier = basename((string) $data['id']);
+        }
+
+        $name = $props['name'] ?? $identifier;
+
+        $lat = 0.0;
+        $lon = 0.0;
+        if (isset($geometry['coordinates']) && is_array($geometry['coordinates'])) {
+            // GeoJSON convention: [lon, lat].
+            $lon = (float) ($geometry['coordinates'][0] ?? 0.0);
+            $lat = (float) ($geometry['coordinates'][1] ?? 0.0);
+        }
+
+        $elevation = null;
+        if (isset($props['elevation']['value'])) {
+            $elevation = (float) $props['elevation']['value'];
+        }
+
+        $timezone = $props['timeZone'] ?? null;
+
+        return new Station(
+            identifier: (string) $identifier,
+            name: (string) $name,
+            coordinate: Coordinate::fromLatLon($lat, $lon),
+            timezone: $timezone,
+            elevation: $elevation,
+        );
     }
 
     /**
@@ -107,7 +273,7 @@ class NationalWeatherService implements WeatherProviderInterface
                     'Location string must be in format "latitude,longitude"'
                 );
             }
-            return Coordinate::fromLatLon((float)trim($parts[0]), (float)trim($parts[1]));
+            return Coordinate::fromLatLon((float) trim($parts[0]), (float) trim($parts[1]));
         }
 
         if (!$location->hasCoordinates()) {
@@ -132,29 +298,38 @@ class NationalWeatherService implements WeatherProviderInterface
      */
     private function makeRequest(string $url): array
     {
+        $request = $this->requestFactory->createRequest('GET', $url)
+            ->withHeader(
+                'User-Agent',
+                $this->config->userAgent ?? 'Horde_Service_Weather (https://www.horde.org/)',
+            );
+
         try {
-            $response = $this->httpClient->get($url, [
-                'User-Agent' => 'Horde_Service_Weather (https://www.horde.org/)',
-            ]);
-
-            $body = $response->getBody();
-            $data = json_decode($body, true);
-
-            if (!is_array($data)) {
-                throw new ApiException('Invalid JSON response from NWS API');
-            }
-
-            if (isset($data['status']) && $data['status'] >= 400) {
-                $message = $data['title'] ?? $data['detail'] ?? 'Unknown error';
-                throw new ApiException('NWS API error: ' . $message);
-            }
-
-            return $data;
-        } catch (ApiException $e) {
-            throw $e;
-        } catch (\Exception $e) {
+            $response = $this->httpClient->sendRequest($request);
+        } catch (ClientExceptionInterface $e) {
             throw new ApiException('HTTP request failed: ' . $e->getMessage(), 0, $e);
         }
+
+        $body = (string) $response->getBody();
+        $status = $response->getStatusCode();
+
+        $data = json_decode($body, true);
+        if (!is_array($data)) {
+            throw new ApiException('Invalid JSON response from NWS API');
+        }
+
+        // NWS embeds problem details in the body under `status`/`title`/`detail`
+        // and mirrors the HTTP status code there. Prefer that when present;
+        // fall back to the HTTP status for other error shapes.
+        if (isset($data['status']) && $data['status'] >= 400) {
+            $message = $data['title'] ?? $data['detail'] ?? 'Unknown error';
+            throw new ApiException('NWS API error: ' . $message);
+        }
+        if ($status >= 400) {
+            throw new ApiException('NWS HTTP ' . $status);
+        }
+
+        return $data;
     }
 
     /**
@@ -183,7 +358,7 @@ class NationalWeatherService implements WeatherProviderInterface
             observationTime: new DateTimeImmutable($props['timestamp']),
             feelsLike: $feelsLike,
             humidity: isset($props['relativeHumidity']['value'])
-                ? Humidity::fromPercentage((int)round($props['relativeHumidity']['value']))
+                ? Humidity::fromPercentage((int) round($props['relativeHumidity']['value']))
                 : null,
             pressure: isset($props['barometricPressure']['value'])
                 ? Pressure::fromMillibars($props['barometricPressure']['value'] / 100) // Convert Pa to hPa
@@ -245,7 +420,7 @@ class NationalWeatherService implements WeatherProviderInterface
             $wind = null;
             if (isset($mainPeriod['windSpeed']) && $mainPeriod['windSpeed'] !== '') {
                 $windSpeed = $this->parseWindSpeed($mainPeriod['windSpeed']);
-                $windDir = WindDirection::from($mainPeriod['windDirection'] ?? 'VAR');
+                $windDir = $this->parseWindDirection($mainPeriod['windDirection'] ?? null);
                 $wind = new Wind($windSpeed, $windDir);
             }
 
@@ -266,11 +441,54 @@ class NationalWeatherService implements WeatherProviderInterface
     }
 
     /**
+     * Parse NWS /forecast/hourly response.
+     *
+     * Each `properties.periods[]` entry is a 1-hour block. Capped at
+     * `$maxHours` to honor the requested horizon.
+     */
+    private function parseHourlyForecast(array $data, Location $originalLocation, int $maxHours): Forecast
+    {
+        $periods = [];
+        foreach ($data['properties']['periods'] ?? [] as $i => $period) {
+            if ($i >= $maxHours) {
+                break;
+            }
+
+            $tempUnit = $period['temperatureUnit'] ?? 'F';
+            $temp = $tempUnit === 'C'
+                ? Temperature::fromCelsius((float) $period['temperature'])
+                : Temperature::fromFahrenheit((float) $period['temperature']);
+
+            $wind = null;
+            if (isset($period['windSpeed']) && $period['windSpeed'] !== '') {
+                $windSpeed = $this->parseWindSpeed($period['windSpeed']);
+                $windDir = $this->parseWindDirection($period['windDirection'] ?? null);
+                $wind = new Wind($windSpeed, $windDir);
+            }
+
+            $periods[] = new ForecastPeriod(
+                date: new DateTimeImmutable($period['startTime']),
+                temperature: $temp,
+                condition: $this->mapWeatherCondition($period['shortForecast'] ?? ''),
+                humidity: isset($period['relativeHumidity']['value'])
+                    ? Humidity::fromPercentage((int) round($period['relativeHumidity']['value']))
+                    : null,
+                wind: $wind,
+                precipitationProbability: isset($period['probabilityOfPrecipitation']['value'])
+                    ? $period['probabilityOfPrecipitation']['value'] / 100
+                    : null,
+            );
+        }
+
+        return new Forecast($originalLocation, $periods, ForecastDetail::DETAILED);
+    }
+
+    /**
      * Parse NWS value structure (value + unitCode).
      */
     private function parseValue(?array $value): ?Temperature
     {
-        if (!$value || !isset($value['value']) || $value['value'] === null) {
+        if (!$value || !isset($value['value'])) {
             return null;
         }
 
@@ -294,7 +512,7 @@ class NationalWeatherService implements WeatherProviderInterface
      */
     private function parseWind(array $props): ?Wind
     {
-        if (!isset($props['windSpeed']['value']) || $props['windSpeed']['value'] === null) {
+        if (!isset($props['windSpeed']['value'])) {
             return null;
         }
 
@@ -305,11 +523,36 @@ class NationalWeatherService implements WeatherProviderInterface
             ? WindDirection::fromDegrees($props['windDirection']['value'])
             : WindDirection::VARIABLE;
 
-        $gusts = isset($props['windGust']['value']) && $props['windGust']['value'] !== null
+        $gusts = isset($props['windGust']['value'])
             ? Speed::fromKilometersPerHour($props['windGust']['value'])
             : null;
 
         return new Wind($speed, $direction, $gusts, $props['windDirection']['value'] ?? null);
+    }
+
+    /**
+     * Parse an NWS wind-direction abbreviation into a WindDirection.
+     *
+     * NWS uses 16-point compass names ("NNE", "ENE", ...) in its forecast
+     * periods, while WindDirection is an 8-point enum. Intermediate points
+     * fold to the nearest 8-point value; unrecognized inputs (including
+     * null and empty) fall through to VARIABLE.
+     */
+    private function parseWindDirection(?string $abbrev): WindDirection
+    {
+        $s = strtoupper(trim((string) $abbrev));
+
+        return match ($s) {
+            'N' => WindDirection::N,
+            'NNE', 'NE', 'ENE' => WindDirection::NE,
+            'E' => WindDirection::E,
+            'ESE', 'SE', 'SSE' => WindDirection::SE,
+            'S' => WindDirection::S,
+            'SSW', 'SW', 'WSW' => WindDirection::SW,
+            'W' => WindDirection::W,
+            'WNW', 'NW', 'NNW' => WindDirection::NW,
+            default => WindDirection::VARIABLE,
+        };
     }
 
     /**
@@ -319,7 +562,7 @@ class NationalWeatherService implements WeatherProviderInterface
     {
         // Extract first number
         if (preg_match('/(\d+)/', $windSpeed, $matches)) {
-            $speed = (float)$matches[1];
+            $speed = (float) $matches[1];
 
             if (str_contains($windSpeed, 'mph')) {
                 return Speed::fromMilesPerHour($speed);

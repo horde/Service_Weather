@@ -23,6 +23,7 @@
  * @author   Michael J Rubinsky <mrubinsk@horde.org>
  * @category Horde
  * @package  Service_Weather
+ * @deprecated 3.0.0 Use \Horde\Service\Weather\Weather instead. Will be removed in 4.0.0.
  */
 class Horde_Service_Weather_Parser_Metar extends Horde_Service_Weather_Parser_Base
 {

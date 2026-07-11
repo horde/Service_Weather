@@ -22,8 +22,7 @@ final readonly class Temperature
      */
     public function __construct(
         private float $celsius
-    ) {
-    }
+    ) {}
 
     /**
      * Create from Celsius.

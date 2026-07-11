@@ -88,4 +88,23 @@ class WeatherConditionTest extends TestCase
         $this->assertSame('snow', WeatherCondition::SNOW->value);
         $this->assertSame('unknown', WeatherCondition::UNKNOWN->value);
     }
+
+    public function testGetIconReturnsKebabCaseSlug(): void
+    {
+        $this->assertSame('clear', WeatherCondition::CLEAR->getIcon());
+        $this->assertSame('partly-cloudy', WeatherCondition::PARTLY_CLOUDY->getIcon());
+        $this->assertSame('freezing-rain', WeatherCondition::FREEZING_RAIN->getIcon());
+        $this->assertSame('thunderstorm', WeatherCondition::THUNDERSTORM->getIcon());
+        $this->assertSame('unknown', WeatherCondition::UNKNOWN->getIcon());
+    }
+
+    public function testAllConditionsHaveIcons(): void
+    {
+        foreach (WeatherCondition::cases() as $condition) {
+            $icon = $condition->getIcon();
+            $this->assertNotEmpty($icon);
+            $this->assertIsString($icon);
+            $this->assertMatchesRegularExpression('/^[a-z-]+$/', $icon);
+        }
+    }
 }

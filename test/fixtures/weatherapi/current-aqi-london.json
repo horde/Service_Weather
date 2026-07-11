@@ -1,0 +1,25 @@
+{
+  "location": {
+    "name": "London", "country": "United Kingdom",
+    "lat": 51.52, "lon": -0.11,
+    "tz_id": "Europe/London",
+    "localtime_epoch": 1783600000, "localtime": "2026-07-09 13:00"
+  },
+  "current": {
+    "temp_c": 22.0, "temp_f": 71.6,
+    "condition": {"text": "Sunny", "code": 1000},
+    "wind_mph": 5.0, "wind_kph": 8.0, "wind_degree": 240, "wind_dir": "WSW",
+    "pressure_mb": 1015.0, "pressure_in": 29.97,
+    "precip_mm": 0.0, "precip_in": 0.0,
+    "humidity": 55, "cloud": 10,
+    "feelslike_c": 22.0, "feelslike_f": 71.6,
+    "vis_km": 10.0, "vis_miles": 6.0, "uv": 7.0,
+    "gust_mph": 8.0, "gust_kph": 12.9,
+    "last_updated_epoch": 1783600000, "last_updated": "2026-07-09 13:00",
+    "air_quality": {
+      "co": 233.6, "no2": 12.5, "o3": 80.1, "so2": 1.6,
+      "pm2_5": 8.2, "pm10": 12.4,
+      "us-epa-index": 2, "gb-defra-index": 3
+    }
+  }
+}

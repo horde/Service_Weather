@@ -109,4 +109,34 @@ class ForecastPeriodTest extends TestCase
         $this->assertNull($period->getWind());
         $this->assertNull($period->getCloudCover());
     }
+
+    public function testUvIndexAndSnowfallAreOptional(): void
+    {
+        $period = new ForecastPeriod(
+            date: new DateTimeImmutable('2026-07-09'),
+            temperature: Temperature::fromCelsius(20),
+            condition: WeatherCondition::CLEAR,
+        );
+
+        $this->assertNull($period->uvIndex);
+        $this->assertNull($period->getUvIndex());
+        $this->assertNull($period->snowfallAmount);
+        $this->assertNull($period->getSnowfallAmount());
+    }
+
+    public function testUvIndexAndSnowfallRoundtrip(): void
+    {
+        $period = new ForecastPeriod(
+            date: new DateTimeImmutable('2026-07-09'),
+            temperature: Temperature::fromCelsius(20),
+            condition: WeatherCondition::CLEAR,
+            uvIndex: 6.5,
+            snowfallAmount: 2.5,
+        );
+
+        $this->assertSame(6.5, $period->uvIndex);
+        $this->assertSame(6.5, $period->getUvIndex());
+        $this->assertSame(2.5, $period->snowfallAmount);
+        $this->assertSame(2.5, $period->getSnowfallAmount());
+    }
 }

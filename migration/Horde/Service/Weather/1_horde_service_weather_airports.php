@@ -1,4 +1,19 @@
 <?php
+/**
+ * Migration from a legacy NOAA airport dataset (no longer downloadable) into
+ * the local station database that once powered
+ * `Horde_Service_Weather_Metar::getLocations()` and `autocompleteLocation()`.
+ *
+ * Superseded by migration 2, which switches the schema to the shape used by
+ * the datasets/airport-codes dataset.
+ *
+ * @method void beginDbTransaction()
+ * @method void commitDbTransaction()
+ * @method void rollbackDbTransaction()
+ * @method \Horde_Db_Adapter_Base_TableDefinition createTable(string $name, array $options = array())
+ * @method void dropTable(string $name)
+ * @method array<int, string> tables()
+ */
 class HordeServiceWeatherAirports extends Horde_Db_Migration_Base
 {
     protected $_handle;
@@ -67,25 +82,25 @@ class HordeServiceWeatherAirports extends Horde_Db_Migration_Base
                     $this->announce('  Line ' . ($line + 1) . ': ' . implode(';', $data));
                     $error++;
             } else {
-                // calculate latitude and longitude
-                // it comes in a ddd-mm[-ss]N|S|E|W format
-                $coord = array(
-                    'latitude' => 7,
-                    'longitude' => 8
-                );
-                foreach ($coord as $latlon => $aId) {
+                // Calculate latitude and longitude in decimal degrees.
+                // The dataset ships them in ddd-mm[-ss]N|S|E|W notation.
+                $parsed = array('latitude' => 0.0, 'longitude' => 0.0);
+                foreach (array('latitude' => 7, 'longitude' => 8) as $latlon => $aId) {
                     preg_match('/^(\d{1,3})-(\d{1,2})(-(\d{1,2}))?([NSEW])$/', $data[$aId], $result);
-                    ${$latlon} = 0;
+                    $value = 0;
                     $factor = 1;
                     foreach ($result as $var) {
                         if ((strlen($var) > 0) && ctype_digit($var)) {
-                            ${$latlon} += $var / $factor;
+                            $value += $var / $factor;
                             $factor *= 60;
                         } elseif (ctype_alpha($var) && in_array($var, array('S', 'W'))) {
-                            ${$latlon} *= (-1);
+                            $value *= (-1);
                         }
                     }
+                    $parsed[$latlon] = $value;
                 }
+                $latitude = $parsed['latitude'];
+                $longitude = $parsed['longitude'];
 
                 // Calculate the cartesian coordinates for latitude and longitude
                 $theta = deg2rad($latitude);
@@ -125,14 +140,15 @@ class HordeServiceWeatherAirports extends Horde_Db_Migration_Base
             }
             $line++;
         }
-        $this->announce('Added ' . ($line - $error) . ' airport identifiers to the database.', 'cli.message');
+        $this->announce('Added ' . ($line - $error) . ' airport identifiers to the database.');
     }
 
-    protected function _checkData($data)
+    protected function _checkData($data, array $dataOrder = array('b' => 1, 's' => 2, 'i' => 0))
     {
-        $dataOrder = array('b' => 1, 's' => 2, 'i' => 0);
         $return = true;
         foreach ($dataOrder as $type => $idx) {
+            $len = 0;
+            $func = 'ctype_digit';
             switch ($type) {
             case 'b':
                 $len  = 2;
@@ -147,7 +163,9 @@ class HordeServiceWeatherAirports extends Horde_Db_Migration_Base
                 $func = 'ctype_alnum';
                 break;
             default:
-                break;
+                // Keep the safe defaults declared above; the switch is a
+                // whitelist and unknown types simply produce no match.
+                continue 2;
             }
             if ((strlen($data[$idx]) != $len) ||
                 (!$func($data[$idx]) && ($data[$idx] != str_repeat('-', $len)))) {
@@ -165,4 +183,12 @@ class HordeServiceWeatherAirports extends Horde_Db_Migration_Base
             $this->dropTable('horde_metar_airports');
         }
     }
+
+    /**
+     * DB connection injected by the migration base class. Declared here so
+     * static analysis can see it; the parent uses a dynamic property.
+     *
+     * @var \Horde_Db_Adapter_Base
+     */
+    protected $_connection;
 }

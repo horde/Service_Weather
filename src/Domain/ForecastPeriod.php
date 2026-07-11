@@ -34,9 +34,10 @@ final readonly class ForecastPeriod
         public ?Wind $wind = null,
         public ?float $precipitationProbability = null,
         public ?float $precipitationAmount = null,
-        public ?int $cloudCover = null
-    ) {
-    }
+        public ?int $cloudCover = null,
+        public ?float $uvIndex = null,
+        public ?float $snowfallAmount = null
+    ) {}
 
     /**
      * Get date/time for this period.
@@ -124,5 +125,21 @@ final readonly class ForecastPeriod
     public function getCloudCover(): ?int
     {
         return $this->cloudCover;
+    }
+
+    /**
+     * Get UV index (0-11+ scale).
+     */
+    public function getUvIndex(): ?float
+    {
+        return $this->uvIndex;
+    }
+
+    /**
+     * Get snowfall amount in mm water equivalent.
+     */
+    public function getSnowfallAmount(): ?float
+    {
+        return $this->snowfallAmount;
     }
 }
