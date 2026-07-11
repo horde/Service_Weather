@@ -9,8 +9,7 @@ list: dev
 type: library
 homepage: https://www.horde.org/libraries/Horde_Service_Weather
 authors:
-  -
-    name: Michael J Rubinsky
+  - name: Michael J Rubinsky
     user: mrubinsk
     email: mrubinsk@horde.org
     active: true
@@ -26,14 +25,20 @@ license:
   uri: http://www.horde.org/licenses/bsd
 dependencies:
   required:
-    php: ^7.4 || ^8
+    php: ^8.1
     composer:
       horde/date: ^3
       horde/exception: ^3
-      horde/http: ^3
       horde/translation: ^3
       horde/url: ^3
+      psr/http-client: ^1
+      psr/http-factory: ^1
+      psr/http-message: ^1 || ^2
+      psr/simple-cache: ^3
   optional:
     composer:
+      horde/db: ^3
+      horde/http: ^3.1.0
       horde/test: ^3
 vendor: horde
+keywords:
